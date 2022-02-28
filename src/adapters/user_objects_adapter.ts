@@ -1,15 +1,15 @@
 import { UserObjectService } from "../application/ports";
 
 var users: User[] = [
-    {
-        id: '1',
-        username: 'wahib',
-        password: 'secret_1',
-        email: 'wahibfarhat13@gmail.com'
-    }
+    // {
+    //     id: '1',
+    //     username: 'wahib',
+    //     password: 'secret_1',
+    //     email: 'wahibfarhat13@gmail.com'
+    // }
 ]
 
-var max_id: number = 1;
+var max_id: number = 0;
 
 export const UserObjectAdapter = (): UserObjectService => {
     return {
@@ -22,7 +22,7 @@ export const UserObjectAdapter = (): UserObjectService => {
         async createUser(user: User) {
             max_id++
             const new_id = String(max_id)
-            const new_user = { id: new_id, ...user }
+            const new_user = { ...user, id: new_id }
             users = [...users, new_user]
             return new_user
         },

@@ -1,4 +1,4 @@
-import { USSDAppObjectService } from "./ports"
+import { PageObjectService, USSDAppObjectService } from "./ports"
 
 
 export const getUSSDApps = async (USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDApp[]> => {
@@ -10,8 +10,33 @@ export const getUSSDApp = async (id: string, USSDAppObjectAdapter: USSDAppObject
 }
 
 
-export const createUSSDApp = async (ussd_app: USSDApp, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDApp | null> => {
-    return await USSDAppObjectAdapter.createUSSDApp(ussd_app)
+export const createUSSDApp = async (
+    ussd_app: USSDApp,
+    USSDAppObjectAdapter: USSDAppObjectService,
+    USSDPageObjectsAdapter: PageObjectService
+): Promise<USSDApp | null> => {
+    const existing_ussd_app = await USSDAppObjectAdapter.findUSSDApp({ shortcode: ussd_app.shortcode })
+    if (existing_ussd_app) {
+        throw Error(`USSD App on shortcode: ${ussd_app.shortcode} exists`)
+    }
+    const new_ussd_app: USSDApp | null = await USSDAppObjectAdapter.createUSSDApp(ussd_app)
+    if (!new_ussd_app) {
+        return null
+    }
+    const blank_page: USSDPage | null = await USSDPageObjectsAdapter.createPage({
+        id: null,
+        context: '',
+        name: 'intro',
+        type: 'END',
+        ussd_app_id: new_ussd_app.id || null,
+    })
+
+    if (!blank_page) {
+        return null
+    }
+
+
+    return new_ussd_app
 }
 
 

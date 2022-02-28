@@ -32,4 +32,4 @@ passport.use(new Strategy(opts, (payload: any, done) => {
 app.use(express.json())
 
 app.use('/api/users/', user_routes)
-app.use('/api/ussd_app/', ussd_app_routes)
+app.use('/api/ussd_apps/', ussd_app_routes)

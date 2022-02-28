@@ -1,12 +1,12 @@
 type USSDApp = {
-    id?: string,
+    id: string | null,
     name?: string,
-    shortcode: string
+    shortcode: string,
 }
 
 type USSDPage = {
-    id?: string,
-    ussd_app: USSDApp,
+    id: string | null,
+    ussd_app_id: string | null,
     name: string,
     context: string,
     prev_page_name?: string,

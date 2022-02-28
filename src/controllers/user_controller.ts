@@ -9,8 +9,10 @@ import http_status_codes from 'http-status-codes'
 export const registerUser = async (req: express.Request, res: express.Response) => {
 
     const new_user: User = {
+        id: null,
         username: req.body.username,
         email: req.body.email,
+        password: null
     }
     try {
         const user = await createUser(new_user, req.body.password, UserObjectAdapter())

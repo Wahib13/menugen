@@ -1,56 +1,46 @@
-import { PageObjectService } from "../application/ports";
-
-const testApp: USSDApp = {
-    shortcode: '*435*100#',
-    name: 'test app'
-}
+import { PageObjectService, USSDAppObjectService } from "../application/ports";
 
 // used for error message
 const anonymousApp: USSDApp = {
+    id: null,
     shortcode: '',
     name: ''
 }
 
-const pages: USSDPage[] = [
-    {
-        name: 'intro',
-        context: 'hello. welcome to the first page',
-        type: 'CONTINUE',
-        next_page_name: 'goodbye',
-        ussd_app: testApp
-    },
-    {
-        name: 'goodbye',
-        context: 'this is the second and last page. goodbye',
-        type: 'END',
-        ussd_app: testApp
-    }
-]
-
 
 const DEFAULT_ERROR_PAGE: USSDPage = {
+    id: null,
     context: 'Sorry your request could not be processed',
     name: 'system_error_page',
     type: 'END',
-    ussd_app: anonymousApp
+    ussd_app_id: anonymousApp.id
 }
 
-export const PageObjectsAdapter = (): PageObjectService => {
+
+var pages: USSDPage[] = [
+    
+]
+
+var max_id = 0
+
+export const USSDPageObjectsAdapter = (): PageObjectService => {
     return {
-        async findPage(shortcode: string, page_name: string) {
-            return await new Promise((resolve, reject) => {
-                return pages.find((page) => page.ussd_app?.shortcode == shortcode && page.name == page_name) || DEFAULT_ERROR_PAGE
-            })
+        async findPage(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
+            
+            const filter_pages = async (page: USSDPage) => {
+                const ussd_app = await USSDAppObjectAdapter.findUSSDApp(page.ussd_app_id)
+                return (ussd_app?.shortcode === shortcode) && (page.name === page_name)
+            }
+            return pages.find(filter_pages) || DEFAULT_ERROR_PAGE
         },
-        getPage(id: string) {
-            return new Promise((resolve, reject) => {
-                return pages.find((page) => page.id == id) || null
-            })
+        async getPage(id: string) {
+            return pages.find((page) => page.id == id) || null
         },
         async createPage(page: USSDPage) {
-            return await new Promise((resolve, reject) => {
-                return page
-            })
+            max_id++
+            const new_ussd_page: USSDPage = {...page, id: String(max_id)}
+            pages = [...pages, new_ussd_page]
+            return page
         }
     }
 }

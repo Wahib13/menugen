@@ -15,6 +15,7 @@ describe('User endpoints', () => {
 
     beforeAll(async () => {
         UserObjectAdapter().createUser({
+            id: null,
             username: test_user.username,
             password: hashPassword(test_user.password),
             email: test_user.email
@@ -43,6 +44,7 @@ describe('User endpoints', () => {
         expect(res.body.password).not.toBe(null || undefined)
         expect(res.body.id).not.toBe(null || undefined)
 
+        // todo fix this to make only the same user be able to view his own details
         const res_login = await requestWithSuperTest.post('/api/users/auth/')
             .send(
                 {
@@ -61,7 +63,6 @@ describe('User endpoints', () => {
         expect(res_get.body.username).toEqual(res.body.username)
         expect(res_get.body.email).toEqual(res.body.email)
         expect(res_get.body.password).not.toBe(null || undefined)
-        console.log(res_get.body)
     })
 
     // it('POST /api/users/ invalid request body should fail', async () => {
