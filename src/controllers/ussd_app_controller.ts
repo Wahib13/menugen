@@ -12,7 +12,6 @@ export const showUSSDApp = async (req: express.Request, res: express.Response) =
 
 export const addUSSDApp = async (req: express.Request, res: express.Response) => {
     const new_ussd_app: USSDApp = {
-        id: null,
         shortcode: req.body.shortcode,
         name: req.body.name
     }
@@ -27,6 +26,7 @@ export const addUSSDApp = async (req: express.Request, res: express.Response) =>
         }
         res.status(http_status_codes.CREATED).send(ussd_app)
     } catch (error) {
+        // todo custom errors
         console.log(error)
         res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({error: `internal error`})
     }

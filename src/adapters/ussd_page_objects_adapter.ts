@@ -2,21 +2,19 @@ import { PageObjectService, USSDAppObjectService } from "../application/ports";
 
 // used for error message
 const anonymousApp: USSDApp = {
-    id: null,
     shortcode: '',
     name: ''
 }
 
 
 const DEFAULT_ERROR_PAGE: USSDPage = {
-    id: null,
     context: 'Sorry your request could not be processed',
     name: 'system_error_page',
     type: 'END',
     level: 1,
     next_page_name: null,
     prev_page_name: null,
-    ussd_app_id: anonymousApp.id
+    ussd_app_id: anonymousApp.id || null
 }
 
 
@@ -46,7 +44,7 @@ export const USSDPageObjectsAdapter = (): PageObjectService => {
             max_id++
             const new_ussd_page: USSDPage = { ...page, id: String(max_id) }
             pages = [...pages, new_ussd_page]
-            return page
+            return new_ussd_page
         },
         async updatePage(id: string | null, new_page: USSDPage) {
             if (!id) {

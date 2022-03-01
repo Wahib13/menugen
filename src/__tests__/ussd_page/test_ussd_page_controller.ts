@@ -52,7 +52,6 @@ describe('USSD Page Endpoints', () => {
         const token = await login(test_user)
 
         const test_create_ussd_app: USSDApp = {
-            id: null,
             shortcode: "*435*100#",
             name: "test_ussd_app",
         }
@@ -65,7 +64,6 @@ describe('USSD Page Endpoints', () => {
         expect(res.body.id).not.toBe(null || undefined)
 
         const test_create_ussd_page: USSDPage = {
-            id: null,
             context: 'hello',
             name: 'second_page',
             prev_page_name: 'intro',
@@ -77,8 +75,40 @@ describe('USSD Page Endpoints', () => {
             .post('/api/ussd_pages/')
             .set('Authorization', `Bearer ${token}`)
             .send(test_create_ussd_page)
+        console.log(res_create_page.body)
         expect(res_create_page.status).toEqual(201)
         expect(res_create_page.body.id).not.toBe(null || undefined)
         expect(res_create_page.body.context).toEqual(test_create_ussd_page.context)
+    })
+
+    it('test the USSD page validator. different scenarios should fail', async () => {
+        // todo more validation tests needed
+        const token = await login(test_user)
+
+        const test_create_ussd_app: USSDApp = {
+            shortcode: "*435*101#",
+            name: "test_ussd_app",
+        }
+        const res = await requestWithSuperTest
+            .post('/api/ussd_apps/')
+            .set('Authorization', `Bearer ${token}`)
+            .send(test_create_ussd_app)
+        expect(res.status).toEqual(201)
+        expect(res.body.shortcode).toEqual(test_create_ussd_app.shortcode)
+        expect(res.body.id).not.toBe(null || undefined)
+
+        const test_create_ussd_page: USSDPage = {
+            context: 'hello',
+            name: 'second_page',
+            prev_page_name: null,
+            type: 'END',
+            ussd_app_id: res.body.id,
+            next_page_name: null
+        }
+        const res_create_page = await requestWithSuperTest
+            .post('/api/ussd_pages/')
+            .set('Authorization', `Bearer ${token}`)
+            .send(test_create_ussd_page)
+        expect(res_create_page.status).toEqual(400)
     })
 })

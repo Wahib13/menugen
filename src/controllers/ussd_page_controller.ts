@@ -6,7 +6,6 @@ import http_status_codes from 'http-status-codes'
 
 export const addUSSDPage = async (req: express.Request, res: express.Response) => {
     const new_ussd_page: USSDPage = {
-        id: null,
         context: req.body.context,
         name: req.body.name,
         type: req.body.type || 'END',
@@ -26,6 +25,7 @@ export const addUSSDPage = async (req: express.Request, res: express.Response) =
         res.status(http_status_codes.CREATED).send(created_ussd_page)
     } catch (error) {
         console.log(error)
+        // todo custom errors that explain better
         res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({error: `internal error`})
     }
 }
