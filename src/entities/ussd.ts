@@ -9,7 +9,8 @@ type USSDPage = {
     ussd_app_id: string | null,
     name: string,
     context: string,
-    prev_page_name?: string,
-    next_page_name?: string,
+    level?: number,
+    prev_page_name: string | null,
+    next_page_name: string | null,
     type: 'END' | 'CONTINUE'
 }

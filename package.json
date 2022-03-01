@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon build/server.js",
-    "test": "cross-env PORT=9000 NODE_ENV=test jest",
+    "test": "cross-env PORT=9000 NODE_ENV=test jest --detectOpenHandles",
     "watch": "tsc -w"
   },
   "author": "",

@@ -15,7 +15,7 @@ export const createUSSDApp = async (
     USSDAppObjectAdapter: USSDAppObjectService,
     USSDPageObjectsAdapter: PageObjectService
 ): Promise<USSDApp | null> => {
-    const existing_ussd_app = await USSDAppObjectAdapter.findUSSDApp({ shortcode: ussd_app.shortcode })
+    const existing_ussd_app = await USSDAppObjectAdapter.queryUSSDApp({ shortcode: ussd_app.shortcode })
     if (existing_ussd_app) {
         throw Error(`USSD App on shortcode: ${ussd_app.shortcode} exists`)
     }
@@ -28,7 +28,10 @@ export const createUSSDApp = async (
         context: '',
         name: 'intro',
         type: 'END',
+        level: 1,
         ussd_app_id: new_ussd_app.id || null,
+        next_page_name: null,
+        prev_page_name: null
     })
 
     if (!blank_page) {
@@ -42,7 +45,7 @@ export const createUSSDApp = async (
 
 export const updateUSSDApp = async (id: string, ussd_app: USSDApp, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDApp | null> => {
     return await USSDAppObjectAdapter.updateUSSDApp(id, ussd_app)
-}
+}   
 
 export const deleteUSSDApp = async (id: string, USSDAppObjectAdapter: USSDAppObjectService) => {
     return await USSDAppObjectAdapter.deleteUSSDApp(id)

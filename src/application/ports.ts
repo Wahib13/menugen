@@ -13,17 +13,18 @@ export interface UserObjectService {
 
 export interface PageObjectService {
     findPage(shortcode: string, page_name: string | undefined, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDPage>
+    queryPage(query: object): Promise<USSDPage | null>
     getPage(id: string): Promise<USSDPage | null>
     // getPages(): USSDPage[]
-    createPage(page: USSDPage): Promise<USSDPage>
-    // updatePage(page: USSDPage): USSDPage
+    createPage(page: USSDPage): Promise<USSDPage | null>
+    updatePage(id: string | null, page: USSDPage): Promise<USSDPage | null>
     // deletePage(id: string): boolean
 }
 
 export interface USSDAppObjectService {
     getUSSDApp(id: string): Promise<USSDApp | null>
     getUSSDApps(): Promise<USSDApp[]>
-    findUSSDApp(query: any): Promise<USSDApp | null>
+    queryUSSDApp(query: object): Promise<USSDApp | null>
     createUSSDApp(ussd_app: USSDApp): Promise<USSDApp | null>
     updateUSSDApp(id: string, ussd_app: USSDApp): Promise<USSDApp | null>
     deleteUSSDApp(id: string): Promise<boolean | null>

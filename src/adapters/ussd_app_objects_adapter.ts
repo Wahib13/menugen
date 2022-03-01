@@ -17,7 +17,7 @@ export const USSDAppObjectAdapter = (): USSDAppObjectService => {
             ussd_apps = [...ussd_apps, new_ussd_app]
             return new_ussd_app
         },
-        async findUSSDApp(query: any) {
+        async queryUSSDApp(query: any) {
             return ussd_apps.find((ussd_app) => ussd_app.shortcode === query.shortcode) || null
         },
         async getUSSDApp(id: string) {

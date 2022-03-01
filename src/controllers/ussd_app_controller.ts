@@ -17,13 +17,17 @@ export const addUSSDApp = async (req: express.Request, res: express.Response) =>
         name: req.body.name
     }
     try {
-        const ussd_app: USSDApp | null = await createUSSDApp(new_ussd_app, USSDAppObjectAdapter(), USSDPageObjectsAdapter())
+        const ussd_app: USSDApp | null = await createUSSDApp(
+            new_ussd_app,
+            USSDAppObjectAdapter(),
+            USSDPageObjectsAdapter()
+        )
         if (!ussd_app) {
             throw Error('USSD app creation failed')
         }
         res.status(http_status_codes.CREATED).send(ussd_app)
     } catch (error) {
         console.log(error)
-        res.status(http_status_codes.INTERNAL_SERVER_ERROR)
+        res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({error: `internal error`})
     }
 }

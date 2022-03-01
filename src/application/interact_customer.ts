@@ -1,11 +1,12 @@
-import { PageObjectService, SessionService } from "./ports";
+import { PageObjectService, SessionService, USSDAppObjectService } from "./ports";
 
 export const getNextPage = async (
     session_id: string,
     customer: Customer,
     input: CustomerInput,
     sessionAdapter: SessionService,
-    pageObjectAdapter: PageObjectService
+    pageObjectAdapter: PageObjectService,
+    USSDAppObjectAdapter: USSDAppObjectService
 ): Promise<USSDPage> => {
 
     let customer_session: CustomerSession | null = {
@@ -38,10 +39,17 @@ export const getNextPage = async (
     if (input.type === 'INITIATE') {
         next_page_name = 'intro'
     } else {
-        next_page_name = (await pageObjectAdapter.findPage(customer_session.shortcode, customer_session.current_page_name)).next_page_name
+        next_page_name = (await pageObjectAdapter.findPage(
+            customer_session.shortcode,
+            customer_session.current_page_name,
+            USSDAppObjectAdapter)
+            ).next_page_name
     }
 
-    const next_page: USSDPage = await pageObjectAdapter.findPage(customer_session.shortcode, next_page_name)
+    const next_page: USSDPage = await pageObjectAdapter.findPage(
+        customer_session.shortcode,
+        next_page_name,
+        USSDAppObjectAdapter)
 
     sessionAdapter.storeSession({...customer_session, current_page_name: next_page.name})
 
