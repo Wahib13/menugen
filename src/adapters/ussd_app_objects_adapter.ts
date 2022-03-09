@@ -3,7 +3,7 @@ import { USSDAppObjectService } from "../application/ports";
 var ussd_apps: USSDApp[] = [
     // {
     //     id: '1',
-    //     shortcode: '*435*100#',
+    //     shortcode: '*435*200#',
     // }
 ]
 

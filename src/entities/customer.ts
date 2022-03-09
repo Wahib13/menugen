@@ -6,7 +6,7 @@ type CustomerSession = {
     customer: Customer,
     shortcode: string,
     session_id: string,
-    current_page_name?: string,
+    current_page_name: string | null,
     user_inputs?: {}
 }
 

@@ -12,13 +12,14 @@ export interface UserObjectService {
 }
 
 export interface PageObjectService {
-    findPage(shortcode: string, page_name: string | undefined, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDPage>
+    findPage(shortcode: string, page_name: string | null, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDPage>
     queryPage(query: object): Promise<USSDPage | null>
+    queryPages(query: object): Promise<USSDPage[] | []>
     getPage(id: string): Promise<USSDPage | null>
     // getPages(): USSDPage[]
     createPage(page: USSDPage): Promise<USSDPage | null>
-    updatePage(id: string | null, page: USSDPage): Promise<USSDPage | null>
-    // deletePage(id: string): boolean
+    updatePage(id: string | null, page: USSDPageUpdate): Promise<USSDPage | null>
+    deletePage(id: string): Promise<boolean>
 }
 
 export interface USSDAppObjectService {

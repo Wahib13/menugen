@@ -2,6 +2,7 @@ import supertest from 'supertest'
 import { UserObjectAdapter } from '../../adapters/user_objects_adapter'
 import { app } from '../../app'
 import { hashPassword } from '../../application/crud_user'
+import http_status_codes from 'http-status-codes'
 
 const requestWithSuperTest = supertest(app)
 
@@ -37,7 +38,7 @@ const login = async (user: User) => {
     return token
 }
 
-describe('USSD app endpoints', () => {
+describe('USSD Page Endpoints', () => {
 
     beforeAll(async () => {
         await createTestUser()
@@ -47,38 +48,49 @@ describe('USSD app endpoints', () => {
         // delete all users
     })
 
-    it('Create a USSD App. it should succeed and a blank USSD page should be created', async () => {
+    it('Update a USSD Page. It requires a USSD page is already created', async () => {
 
         const token = await login(test_user)
 
         const test_create_ussd_app: USSDApp = {
-            shortcode: "*435*100#",
+            shortcode: "*435*102#",
             name: "test_ussd_app",
         }
         const res = await requestWithSuperTest
             .post('/api/ussd_apps/')
             .set('Authorization', `Bearer ${token}`)
-            .send(
-                test_create_ussd_app
-            )
+            .send(test_create_ussd_app)
         expect(res.status).toEqual(201)
-        expect(res.body.shortcode).toEqual("*435*100#")
+        expect(res.body.shortcode).toEqual(test_create_ussd_app.shortcode)
         expect(res.body.id).not.toBe(null || undefined)
 
-        // test get it back and verify it is what was created
-        const res_get = await requestWithSuperTest
-            .get(`/api/ussd_apps/${res.body.id}`)
+        const test_create_ussd_page: USSDPage = {
+            context: 'hello',
+            name: 'third_page',
+            prev_page_name: 'intro',
+            type: 'END',
+            ussd_app_id: res.body.id,
+            next_page_name: null
+        }
+        const res_create_page = await requestWithSuperTest
+            .post('/api/ussd_pages/')
             .set('Authorization', `Bearer ${token}`)
-        expect(res_get.status).toEqual(200)
-        expect(res_get.body.shortcode).toEqual("*435*100#")
-        expect(res_get.body.id).toEqual(res.body.id)
+            .send(test_create_ussd_page)
+        expect(res_create_page.status).toEqual(201)
+        expect(res_create_page.body.id).not.toBe(null || undefined)
+        expect(res_create_page.body.context).toEqual(test_create_ussd_page.context)
 
-        const res_get_all = await requestWithSuperTest
-            .get('/api/ussd_apps/')
+        const test_update_ussd_page: USSDPageUpdate = {
+            context: 'hello from the other side!',
+            name: 'not_third_page',
+            type: 'CONTINUE',
+        }
+        const res_update_page = await requestWithSuperTest
+            .put(`/api/ussd_pages/${res_create_page.body.id}`)
             .set('Authorization', `Bearer ${token}`)
-        expect(res_get_all.status).toEqual(200)
-        expect(res_get_all.body.length).toBeGreaterThan(0)
-        expect(res_get_all.body[0].id).toEqual(res.body.id)
-
+            .send(test_update_ussd_page)
+        expect(res_update_page.status).toEqual(200)
+        expect(res_update_page.body.name).toEqual(test_update_ussd_page.name)
+        expect(res_update_page.body.type).toEqual(test_update_ussd_page.type)
     })
 })

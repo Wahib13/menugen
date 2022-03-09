@@ -1,12 +1,7 @@
 import { UserObjectService } from "../application/ports";
 
 var users: User[] = [
-    // {
-    //     id: '1',
-    //     username: 'wahib',
-    //     password: 'secret_1',
-    //     email: 'wahibfarhat13@gmail.com'
-    // }
+    
 ]
 
 var max_id: number = 0;

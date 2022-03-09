@@ -6,6 +6,7 @@ import { user_routes } from './routes/user_routes'
 import { ussd_app_routes } from './routes/ussd_app_routes'
 import dotenv from 'dotenv'
 import { ussd_page_routes } from './routes/ussd_page_routes'
+import cors from 'cors'
 
 dotenv.config()
 
@@ -16,6 +17,11 @@ if (!SECRET) {
     throw Error('app SECRET undefined. exiting')
 }
 
+const corsOptions = {
+    origin: ['http://localhost:3000', 'https://menugen-ui.vercel.app'],
+}
+
+app.use(cors(corsOptions))
 
 const opts: StrategyOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

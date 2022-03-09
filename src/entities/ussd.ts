@@ -14,3 +14,9 @@ type USSDPage = {
     next_page_name: string | null,
     type: 'END' | 'CONTINUE'
 }
+
+type USSDPageUpdate = {
+    name?: string,
+    context?: string,
+    type?: 'END' | 'CONTINUE'
+}

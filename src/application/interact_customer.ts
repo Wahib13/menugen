@@ -12,7 +12,8 @@ export const getNextPage = async (
     let customer_session: CustomerSession | null = {
         customer: customer,
         session_id: session_id,
-        shortcode: input.message
+        shortcode: input.message,
+        current_page_name: null
     }
 
     if (input.type !== 'INITIATE') {
@@ -34,7 +35,7 @@ export const getNextPage = async (
         }
     }
 
-    let next_page_name: string | undefined = undefined
+    let next_page_name: string | null = null
 
     if (input.type === 'INITIATE') {
         next_page_name = 'intro'

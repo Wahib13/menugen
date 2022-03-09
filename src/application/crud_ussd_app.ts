@@ -24,7 +24,6 @@ export const createUSSDApp = async (
         return null
     }
     const blank_page: USSDPage | null = await USSDPageObjectsAdapter.createPage({
-        id: null,
         context: '',
         name: 'intro',
         type: 'END',
