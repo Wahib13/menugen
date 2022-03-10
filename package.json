@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon build/server.js",
+    "start": "tsc && cross-env pm2 start build/server.js",
+    "stop": "pm2 stop",
     "test": "cross-env PORT=9000 NODE_ENV=test jest",
     "watch": "tsc -w"
   },
@@ -24,6 +26,7 @@
     "mustache": "^4.2.0",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
+    "pm2": "^5.2.0",
     "tedis": "^0.1.12",
     "typescript": "^4.5.5"
   },
