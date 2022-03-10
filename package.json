@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon build/server.js",
-    "start": "tsc && cross-env pm2 start build/server.js",
-    "stop": "pm2 stop",
+    "start": "tsc && pm2 start build/server.js",
+    "stop": "pm2 stop server",
     "watch": "tsc -w"
   },
   "author": "",
