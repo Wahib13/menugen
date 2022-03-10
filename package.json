@@ -7,7 +7,6 @@
     "dev": "nodemon build/server.js",
     "start": "tsc && cross-env pm2 start build/server.js",
     "stop": "pm2 stop",
-    "test": "cross-env PORT=9000 NODE_ENV=test jest",
     "watch": "tsc -w"
   },
   "author": "",
@@ -41,5 +40,8 @@
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
     "supertest": "^6.2.2"
+  },
+  "engines": {
+    "node": "16.3.x"
   }
 }
