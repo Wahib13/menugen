@@ -13,7 +13,8 @@ const USSDSchema = {
                 type: { type: "array", minItems: 1, maxItems: 1, items: { type: "string" }, enum: [["1"], ["2"]] },
                 msg: { type: "array", minItems: 1, maxItems: 1, items: { type: "string" } }
             },
-            required: ["msisdn", "sessionid", "type", "msg"]
+            required: ["msisdn", "sessionid", "type", "msg"],
+            additionalProperties: true
         }
     },
     required: ["ussd"],
