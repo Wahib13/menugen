@@ -7,6 +7,7 @@ import { ussd_app_routes } from './routes/ussd_app_routes'
 import dotenv from 'dotenv'
 import { ussd_page_routes } from './routes/ussd_page_routes'
 import cors from 'cors'
+import { ussd_interaction_router } from './routes/ussd_interaction_routes'
 
 dotenv.config()
 
@@ -41,3 +42,5 @@ app.use(express.json())
 app.use('/api/users/', user_routes)
 app.use('/api/ussd_apps/', ussd_app_routes)
 app.use('/api/ussd_pages/', ussd_page_routes)
+
+app.use('/menu_gen/pull/', ussd_interaction_router)

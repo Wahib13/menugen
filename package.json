@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon build/server.js",
     "start": "tsc && pm2-runtime start build/server.js --env production",
+    "test": "cross-env PORT=9000 NODE_ENV=test jest",
     "stop": "pm2 stop server",
     "watch": "tsc -w"
   },
@@ -15,6 +16,7 @@
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.4.0",
+    "@types/mustache": "^4.1.2",
     "@types/passport": "^1.0.7",
     "@types/passport-jwt": "^3.0.6",
     "@types/supertest": "^2.0.11",
@@ -24,6 +26,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-xml-bodyparser": "^0.3.0",
     "http-status-codes": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.3",
@@ -33,15 +36,14 @@
     "passport-jwt": "^4.0.0",
     "pm2": "^5.2.0",
     "tedis": "^0.1.12",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
+    "@types/express-xml-bodyparser": "^0.3.2",
     "cross-env": "^7.0.3",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
     "supertest": "^6.2.2"
-  },
-  "engines": {
-    "node": "16.3.x"
   }
 }

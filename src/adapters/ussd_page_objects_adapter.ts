@@ -19,15 +19,7 @@ const DEFAULT_ERROR_PAGE: USSDPage = {
 
 
 var pages: USSDPage[] = [
-    // {
-    //     context: 'hello. this is first page',
-    //     name: 'intro',
-    //     ussd_app_id: '1',
-    //     next_page_name: null,
-    //     prev_page_name: null,
-    //     level: 1,
-    //     type: 'END'
-    // }
+
 ]
 
 var max_id = 0
@@ -37,14 +29,16 @@ export const USSDPageObjectsAdapter = (): PageObjectService => {
         async queryPage(query: any) {
             return pages.find((page) => page.name === query.name && page.ussd_app_id === query.ussd_app_id) || null
         },
-        async findPage(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
-
-            const filter_pages = async (page: USSDPage) => {
-                const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({ ussd_app_id: page.ussd_app_id })
-                return (ussd_app?.shortcode === shortcode) && (page.name === page_name)
-            }
-            return pages.find(filter_pages) || DEFAULT_ERROR_PAGE
+        async findPage(ussd_app_id: string, page_name: string) {
+            return pages.find((page) => page.ussd_app_id == ussd_app_id && page.name === page_name) || DEFAULT_ERROR_PAGE
         },
+        // async findPage2(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
+        //     const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({shortcode: shortcode})
+        //     if (!ussd_app) {
+        //         return DEFAULT_ERROR_PAGE
+        //     }
+        //     return pages.find((page) => page.ussd_app_id == ussd_app.id && page.name === page_name) || DEFAULT_ERROR_PAGE
+        // },
         async getPage(id: string) {
             return pages.find((page) => page.id == id) || null
         },
@@ -80,6 +74,9 @@ export const USSDPageObjectsAdapter = (): PageObjectService => {
         },
         async queryPages(query: any) {
             return pages.filter((page) => page.ussd_app_id === query.ussd_app_id)
+        },
+        async getDefaultErrorPage() {
+            return DEFAULT_ERROR_PAGE
         }
     }
 }

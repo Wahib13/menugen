@@ -7,7 +7,7 @@ type CustomerSession = {
     shortcode: string,
     session_id: string,
     current_page_name: string | null,
-    user_inputs?: {}
+    user_inputs?: Record<string, string>
 }
 
 type CustomerInput = {

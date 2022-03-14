@@ -1,3 +1,4 @@
+import { throwConflictError } from "../entities/errors"
 import { PageObjectService, USSDAppObjectService } from "./ports"
 
 
@@ -17,7 +18,7 @@ export const createUSSDApp = async (
 ): Promise<USSDApp | null> => {
     const existing_ussd_app = await USSDAppObjectAdapter.queryUSSDApp({ shortcode: ussd_app.shortcode })
     if (existing_ussd_app) {
-        throw Error(`USSD App on shortcode: ${ussd_app.shortcode} exists`)
+        throwConflictError(`USSD App on shortcode: ${ussd_app.shortcode} exists`)
     }
     const new_ussd_app: USSDApp | null = await USSDAppObjectAdapter.createUSSDApp(ussd_app)
     if (!new_ussd_app) {
@@ -44,7 +45,7 @@ export const createUSSDApp = async (
 
 export const updateUSSDApp = async (id: string, ussd_app: USSDApp, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDApp | null> => {
     return await USSDAppObjectAdapter.updateUSSDApp(id, ussd_app)
-}   
+}
 
 export const deleteUSSDApp = async (id: string, USSDAppObjectAdapter: USSDAppObjectService) => {
     return await USSDAppObjectAdapter.deleteUSSDApp(id)

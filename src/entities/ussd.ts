@@ -15,6 +15,11 @@ type USSDPage = {
     type: 'END' | 'CONTINUE'
 }
 
+type CustomerFeedbackPage = {
+    content: string,
+    type: 'END' | 'CONTINUE'
+}
+
 type USSDPageUpdate = {
     name?: string,
     context?: string,

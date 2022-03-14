@@ -3,6 +3,7 @@ import { USSDAppObjectAdapter } from '../adapters/ussd_app_objects_adapter'
 import { createUSSDApp, getUSSDApp, getUSSDApps } from '../application/crud_ussd_app'
 import http_status_codes from 'http-status-codes'
 import { USSDPageObjectsAdapter } from '../adapters/ussd_page_objects_adapter'
+import { CustomError } from '../entities/errors'
 
 export const showUSSDApp = async (req: express.Request, res: express.Response) => {
     const id = req.params.id
@@ -12,7 +13,7 @@ export const showUSSDApp = async (req: express.Request, res: express.Response) =
     } catch (error) {
         // todo custom errors
         console.log(error)
-        res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({error: `internal error`})        
+        res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({ error: `internal error` })
     }
 }
 
@@ -23,7 +24,7 @@ export const showUSSDApps = async (req: express.Request, res: express.Response) 
     } catch (error) {
         // todo custom errors
         console.log(error)
-        res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({error: `internal error`})        
+        res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({ error: `internal error` })
     }
 }
 
@@ -42,9 +43,13 @@ export const addUSSDApp = async (req: express.Request, res: express.Response) =>
             throw Error('USSD app creation failed')
         }
         res.status(http_status_codes.CREATED).send(ussd_app)
-    } catch (error) {
-        // todo custom errors
-        console.log(error)
-        res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({error: `internal error`})
+    }
+    catch (error: any) {
+        if (error.name === CustomError.ConflictError) {
+            res.status(http_status_codes.CONFLICT).send({ error: error.message })
+        } else {
+            console.log(error)
+            res.status(http_status_codes.INTERNAL_SERVER_ERROR).send({ error: `internal error` })
+        }
     }
 }
