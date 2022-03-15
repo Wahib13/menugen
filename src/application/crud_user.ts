@@ -1,4 +1,5 @@
 import { UserObjectService } from "./ports";
+import bcrypt from 'bcrypt'
 
 
 export const createUser = async (
@@ -7,7 +8,7 @@ export const createUser = async (
     UserObjectAdapter: UserObjectService
 ): Promise<User | null> => {
     // TODO user validations
-    const user_copy: User = { ...user, password: hashPassword(raw_password) }
+    const user_copy: User = { ...user, password: await hashPassword(raw_password) }
     try {
         const user = await UserObjectAdapter.createUser(user_copy)
         return user
@@ -24,11 +25,11 @@ export const authenticateUser = async (
     UserObjectAdapter: UserObjectService
 ): Promise<User | null> => {
     try {
-        const user: User | null = await UserObjectAdapter.findUser({username: username})
+        const user: User | null = await UserObjectAdapter.findUser({ username: username })
         if (!user) {
             return null
         }
-        if (hashPassword(raw_password) === user.password) {
+        if (await bcrypt.compare(raw_password, user.password || '')) {
             return user
         }
     } catch (error) {
@@ -60,8 +61,8 @@ export const getUsers = async (
     return null
 }
 
-export const hashPassword = (
+export const hashPassword = async (
     raw_password: string
-): string => {
-    return raw_password + '_1'
+): Promise<string> => {
+    return await bcrypt.hash(raw_password, 10)
 }

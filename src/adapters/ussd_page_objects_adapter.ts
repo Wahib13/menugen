@@ -1,4 +1,6 @@
 import { PageObjectService, USSDAppObjectService } from "../application/ports";
+import fs from 'fs'
+import path from 'path'
 
 // used for error message
 const anonymousApp: USSDApp = {
@@ -18,27 +20,36 @@ const DEFAULT_ERROR_PAGE: USSDPage = {
 }
 
 
-var pages: USSDPage[] = [
+var pages: USSDPage[] = JSON.parse(fs.readFileSync(path.join(__dirname, '../../fake_data/pages.json'), 'utf-8'))
 
-]
 
-var max_id = 0
+const writeToFile = async () => {
+    await fs.writeFile('fake_data/pages.json', JSON.stringify(pages), () => { })
+}
+
+try {
+    var max_id = Number(pages.reduce((prev, current) => {
+        return (Number(prev.id) > Number(current.id)) ? prev : current
+    }).id || 0)    
+} catch (error) {
+    var max_id: number = 0
+}
 
 export const USSDPageObjectsAdapter = (): PageObjectService => {
     return {
         async queryPage(query: any) {
             return pages.find((page) => page.name === query.name && page.ussd_app_id === query.ussd_app_id) || null
         },
-        async findPage(ussd_app_id: string, page_name: string) {
-            return pages.find((page) => page.ussd_app_id == ussd_app_id && page.name === page_name) || DEFAULT_ERROR_PAGE
-        },
-        // async findPage2(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
-        //     const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({shortcode: shortcode})
-        //     if (!ussd_app) {
-        //         return DEFAULT_ERROR_PAGE
-        //     }
-        //     return pages.find((page) => page.ussd_app_id == ussd_app.id && page.name === page_name) || DEFAULT_ERROR_PAGE
+        // async findPage(ussd_app_id: string, page_name: string) {
+        //     return pages.find((page) => page.ussd_app_id == ussd_app_id && page.name === page_name) || DEFAULT_ERROR_PAGE
         // },
+        async findPage(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
+            const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({shortcode: shortcode})
+            if (!ussd_app) {
+                return DEFAULT_ERROR_PAGE
+            }
+            return pages.find((page) => page.ussd_app_id == ussd_app.id && page.name === page_name) || DEFAULT_ERROR_PAGE
+        },
         async getPage(id: string) {
             return pages.find((page) => page.id == id) || null
         },
@@ -46,6 +57,7 @@ export const USSDPageObjectsAdapter = (): PageObjectService => {
             max_id++
             const new_ussd_page: USSDPage = { ...page, id: String(max_id) }
             pages = [...pages, new_ussd_page]
+            await writeToFile()
             return new_ussd_page
         },
         async updatePage(id: string | null, new_page: USSDPageUpdate) {
@@ -66,10 +78,12 @@ export const USSDPageObjectsAdapter = (): PageObjectService => {
             if (updated_page) {
                 return updated_page
             }
+            await writeToFile()
             return null
         },
         async deletePage(id: string) {
             pages = pages.filter((page) => page.id != id)
+            await writeToFile()
             return true
         },
         async queryPages(query: any) {

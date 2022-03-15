@@ -17,7 +17,7 @@ describe('User endpoints', () => {
         UserObjectAdapter().createUser({
             id: null,
             username: test_user.username,
-            password: hashPassword(test_user.password),
+            password: await hashPassword(test_user.password),
             email: test_user.email
         }).then((created_user) => test_user = { ...test_user, id: created_user?.id || null })
     })

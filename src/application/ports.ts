@@ -12,7 +12,7 @@ export interface UserObjectService {
 }
 
 export interface PageObjectService {
-    findPage(ussd_app_id: string, page_name: string | null): Promise<USSDPage>
+    findPage(shortcode: string, page_name: string | null, USSDAppObjectAdapter: USSDAppObjectService): Promise<USSDPage>
     queryPage(query: object): Promise<USSDPage | null>
     queryPages(query: object): Promise<USSDPage[] | []>
     getPage(id: string): Promise<USSDPage | null>

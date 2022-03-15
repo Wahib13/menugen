@@ -24,7 +24,7 @@ export const getNextFeedbackPage = async (
         if (!ussd_app) {
             throw Error(`USSD app on shortcode ${shortcode} not found`)
         }
-        const next_page: USSDPage = await pageObjectAdapter.findPage(ussd_app.id || '', 'intro')
+        const next_page: USSDPage = await pageObjectAdapter.findPage(shortcode, 'intro', USSDAppObjectAdapter)
         customer_session = { ...customer_session, current_page_name: next_page.name }
         sessionAdapter.storeSession(customer_session)
         return getRawPage(next_page, customer_session)
@@ -42,7 +42,7 @@ export const getNextFeedbackPage = async (
         if (!current_page_name) {
             throw Error(`user session ${session_id} has no valid page name`)
         }
-        const current_page: USSDPage = await pageObjectAdapter.findPage(ussd_app.id || '', current_page_name)
+        const current_page: USSDPage = await pageObjectAdapter.findPage(shortcode, current_page_name, USSDAppObjectAdapter)
         const customer_input_value = input.message
 
         customer_session.user_inputs = {
@@ -50,7 +50,7 @@ export const getNextFeedbackPage = async (
             [current_page_name]: customer_input_value
         }
 
-        const next_page: USSDPage | null = await getNextPage(input.message, ussd_app.id || '', current_page, pageObjectAdapter)
+        const next_page: USSDPage | null = await getNextPage(input.message, shortcode, current_page, pageObjectAdapter, USSDAppObjectAdapter)
         if (!next_page) {
             throw Error(`failed to get next page. next page is null`)
         }
@@ -64,9 +64,10 @@ export const getNextFeedbackPage = async (
 
 const getNextPage = async (
     input_message: string,
-    ussd_app_id: string,
+    shortcode: string,
     current_page: USSDPage,
     pageObjectAdapter: PageObjectService,
+    USSDAppObjectAdapter: USSDAppObjectService
 ): Promise<USSDPage | null> => {
 
     const next_page_name = current_page.next_page_name || null
@@ -75,7 +76,7 @@ const getNextPage = async (
         return null
     }
     console.log(`detected next page name: ${next_page_name}`)
-    const page = await pageObjectAdapter.findPage(ussd_app_id, next_page_name)
+    const page = await pageObjectAdapter.findPage(shortcode, next_page_name, USSDAppObjectAdapter)
     console.log(`detected next page id: ${page.name}`)
     console.log(`detected next page id: ${page.id}`)
     console.log(`detected next page id: ${page.context}`)

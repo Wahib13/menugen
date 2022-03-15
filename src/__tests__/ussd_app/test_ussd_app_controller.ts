@@ -18,7 +18,7 @@ const createTestUser = async (): Promise<User | null> => {
     return await UserObjectAdapter().createUser({
         id: null,
         username: test_user.username,
-        password: hashPassword(test_user.password || ''),
+        password: await hashPassword(test_user.password || ''),
         email: test_user.email
     })
 }

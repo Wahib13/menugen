@@ -1,10 +1,21 @@
 import { UserObjectService } from "../application/ports";
+import fs from 'fs'
+import path from 'path'
 
-var users: User[] = [
-    
-]
+var users: User[] = JSON.parse(fs.readFileSync(path.join(__dirname, '../../fake_data/users.json'), 'utf-8'))
 
-var max_id: number = 0;
+const writeToFile = async () => {
+    await fs.writeFile('fake_data/users.json', JSON.stringify(users), () => { })
+}
+
+try {
+    var max_id: number = Number(users.reduce((prev, current) => {
+        return (Number(prev.id) > Number(current.id)) ? prev : current
+    }).id || 0);
+} catch (error) {
+    var max_id: number = 0
+}
+
 
 export const UserObjectAdapter = (): UserObjectService => {
     return {
@@ -19,6 +30,7 @@ export const UserObjectAdapter = (): UserObjectService => {
             const new_id = String(max_id)
             const new_user = { ...user, id: new_id }
             users = [...users, new_user]
+            await writeToFile()
             return new_user
         },
         async findUser(query: any) {
