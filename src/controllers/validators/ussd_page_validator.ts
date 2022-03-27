@@ -13,7 +13,23 @@ const createUSSDPageSchema = {
         type: { type: "string", enum: ["END", "CONTINUE"] }
     },
     required: ["ussd_app_id", "name", "context", "prev_page_name"],
-    additionalProperties: false
+    additionalProperties: false,
+    anyOf: [
+        {
+            properties: {
+                options: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            content: { type: "string" },
+                            next_page_name: { type: "string" }
+                        }
+                    }
+                }
+            },
+        }
+    ]
 }
 
 

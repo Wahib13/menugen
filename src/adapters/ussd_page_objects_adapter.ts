@@ -1,6 +1,26 @@
 import { PageObjectService, USSDAppObjectService } from "../application/ports";
-import fs from 'fs'
-import path from 'path'
+import { Schema, model } from 'mongoose'
+
+const PageSchema: Schema<USSDPage> = new Schema<USSDPage>({
+    ussd_app_id: { type: String, required: false },
+    name: { type: String, required: true },
+    context: { type: String, required: false, default: '' },
+    level: { type: Number, required: true },
+    options: { type: Array, required: true },
+    prev_page_name: { type: String, required: false, default: '' },
+    next_page_name: { type: String, required: false, default: '' },
+    type: { type: String, required: true },
+})
+PageSchema.set('toJSON', {
+    transform: (doc, ret, optios) => {
+        ret.id = ret._id,
+            delete ret._id,
+            delete ret.user_id,
+            delete ret.__v
+    }
+})
+
+const PageModel = model('USSD_Page', PageSchema)
 
 // used for error message
 const anonymousApp: USSDApp = {
@@ -20,74 +40,39 @@ const DEFAULT_ERROR_PAGE: USSDPage = {
 }
 
 
-var pages: USSDPage[] = JSON.parse(fs.readFileSync(path.join(__dirname, '../../fake_data/pages.json'), 'utf-8'))
-
-
-const writeToFile = async () => {
-    await fs.writeFile('fake_data/pages.json', JSON.stringify(pages), () => { })
-}
-
-try {
-    var max_id = Number(pages.reduce((prev, current) => {
-        return (Number(prev.id) > Number(current.id)) ? prev : current
-    }).id || 0)    
-} catch (error) {
-    var max_id: number = 0
-}
 
 export const USSDPageObjectsAdapter = (): PageObjectService => {
     return {
         async queryPage(query: any) {
-            return pages.find((page) => page.name === query.name && page.ussd_app_id === query.ussd_app_id) || null
+            return await PageModel.findOne(query)
         },
-        // async findPage(ussd_app_id: string, page_name: string) {
-        //     return pages.find((page) => page.ussd_app_id == ussd_app_id && page.name === page_name) || DEFAULT_ERROR_PAGE
-        // },
         async findPage(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
-            const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({shortcode: shortcode})
+            const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({ shortcode: shortcode })
             if (!ussd_app) {
                 return DEFAULT_ERROR_PAGE
             }
-            return pages.find((page) => page.ussd_app_id == ussd_app.id && page.name === page_name) || DEFAULT_ERROR_PAGE
+            return await PageModel.findOne({ ussd_app_id: ussd_app.id, name: page_name }) || DEFAULT_ERROR_PAGE
         },
         async getPage(id: string) {
-            return pages.find((page) => page.id == id) || null
+            return await PageModel.findOne({ _id: id }).exec()
         },
         async createPage(page: USSDPage) {
-            max_id++
-            const new_ussd_page: USSDPage = { ...page, id: String(max_id) }
-            pages = [...pages, new_ussd_page]
-            await writeToFile()
+            const new_ussd_page: USSDPage = await PageModel.create({...page})
             return new_ussd_page
         },
-        async updatePage(id: string | null, new_page: USSDPageUpdate) {
+        async updatePage(id: string | null, page_update: USSDPageUpdate) {
             if (!id) {
                 return null
             }
-            const page_to_update: USSDPage | null = pages.find((page) => page.id === id) || null
-            if (page_to_update) {
-                const updated_page: USSDPage = {
-                    ...page_to_update,
-                    name: new_page.name == null ? page_to_update.name : new_page.name,
-                    context: new_page.context == null ? page_to_update.context : new_page.context,
-                    type: new_page.type || page_to_update.type
-                }
-                pages[pages.indexOf(page_to_update)] = updated_page
-            }
-            const updated_page: USSDPage | null = pages.find((page) => page.id === id) || null
-            if (updated_page) {
-                return updated_page
-            }
-            await writeToFile()
-            return null
+            await PageModel.findOneAndUpdate({ _id: id }, { ...page_update })
+            return await PageModel.findOne({ _id: id })
         },
         async deletePage(id: string) {
-            pages = pages.filter((page) => page.id != id)
-            await writeToFile()
+            await PageModel.deleteOne({ _id: id })
             return true
         },
         async queryPages(query: any) {
-            return pages.filter((page) => page.ussd_app_id === query.ussd_app_id)
+            return PageModel.find({ ...query })
         },
         async getDefaultErrorPage() {
             return DEFAULT_ERROR_PAGE

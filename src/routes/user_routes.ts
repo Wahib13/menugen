@@ -13,5 +13,5 @@ export const user_routes = express.Router()
 
 // user_routes.route('/').get(loginRequiredMiddleware, showAllUsers)
 user_routes.route('/').post(createUserValidator, registerUser)
-user_routes.route('/:id').get(loginRequiredMiddleware, showUser)
+user_routes.route('/:id').get(showUser)
 user_routes.route('/auth').post(login)

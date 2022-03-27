@@ -1,7 +1,13 @@
 import supertest from 'supertest'
 import { UserObjectAdapter } from '../../adapters/user_objects_adapter'
-import { app } from '../../app'
+import { app, initializeApp, terminateApp } from '../../app'
 import { hashPassword } from '../../application/crud_user'
+import dotenv from 'dotenv'
+import { cleanup_db } from '../utils'
+
+dotenv.config()
+
+const database_name = 'test_ussd_app_validator'
 
 const requestWithSuperTest = supertest(app)
 
@@ -40,11 +46,13 @@ const login = async (user: User) => {
 describe('USSD app endpoints', () => {
 
     beforeAll(async () => {
+        await initializeApp({ database_name: database_name })
         await createTestUser()
     })
 
     afterAll(async () => {
-        // delete all users
+        await terminateApp()
+        await cleanup_db(database_name)
     })
 
     it('Create a USSD App. it should succeed and a blank USSD page should be created', async () => {
@@ -52,7 +60,7 @@ describe('USSD app endpoints', () => {
         const token = await login(test_user)
 
         const test_create_ussd_app: USSDApp = {
-            shortcode: "*435*100#",
+            shortcode: "*435*109#",
             name: "test_ussd_app",
         }
         const res = await requestWithSuperTest
@@ -62,7 +70,7 @@ describe('USSD app endpoints', () => {
                 test_create_ussd_app
             )
         expect(res.status).toEqual(201)
-        expect(res.body.shortcode).toEqual("*435*100#")
+        expect(res.body.shortcode).toEqual("*435*109#")
         expect(res.body.id).not.toBe(null || undefined)
 
         // test get it back and verify it is what was created
@@ -70,7 +78,7 @@ describe('USSD app endpoints', () => {
             .get(`/api/ussd_apps/${res.body.id}`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_get.status).toEqual(200)
-        expect(res_get.body.shortcode).toEqual("*435*100#")
+        expect(res_get.body.shortcode).toEqual("*435*109#")
         expect(res_get.body.id).toEqual(res.body.id)
 
         const res_get_all = await requestWithSuperTest

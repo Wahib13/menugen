@@ -1,11 +1,12 @@
 import supertest from 'supertest'
 import { UserObjectAdapter } from '../../adapters/user_objects_adapter'
-import { app } from '../../app'
+import { app, initializeApp, terminateApp } from '../../app'
 import { hashPassword } from '../../application/crud_user'
-import http_status_codes from 'http-status-codes'
+import { cleanup_db } from '../utils'
+
+const database_name = 'test_create_ussd_page'
 
 const requestWithSuperTest = supertest(app)
-
 
 const test_user: User = {
     id: null,
@@ -41,11 +42,13 @@ const login = async (user: User) => {
 describe('USSD Page Endpoints', () => {
 
     beforeAll(async () => {
+        await initializeApp({ database_name: database_name })
         await createTestUser()
     })
 
     afterAll(async () => {
-        // delete all users
+        await terminateApp()
+        await cleanup_db(database_name)
     })
 
     it('Create a USSD Page. It requires a USSD app is already created', async () => {
@@ -69,7 +72,6 @@ describe('USSD Page Endpoints', () => {
             .get(`/api/ussd_pages/?app_id=${res.body.id}`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_all_pages.status).toEqual(200)
-        console.log(res_get_all_pages.body)
         expect(res_get_all_pages.body.length).not.toBe(0)
         expect(res_get_all_pages.body[0].id).not.toBe(null || undefined)
 

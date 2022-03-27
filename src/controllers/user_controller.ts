@@ -4,6 +4,7 @@ import { authenticateUser, createUser, getUser, getUsers } from '../application/
 import jwt from 'jsonwebtoken'
 import { SECRET } from '../app'
 import http_status_codes from 'http-status-codes'
+import util from 'util'
 
 
 export const registerUser = async (req: express.Request, res: express.Response) => {

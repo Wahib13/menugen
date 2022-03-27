@@ -6,13 +6,14 @@
   "scripts": {
     "dev": "nodemon build/server.js",
     "start": "tsc && pm2-runtime start build/server.js --env production",
-    "test": "cross-env PORT=9000 NODE_ENV=test jest",
+    "test": "cross-env PORT=9000 DATABASE_NAME=menugen_test NODE_ENV=test jest",
     "stop": "pm2 stop server",
     "watch": "tsc -w"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
     "@types/express-xml-bodyparser": "^0.3.2",
@@ -21,7 +22,6 @@
     "@types/passport": "^1.0.7",
     "@types/passport-jwt": "^3.0.6",
     "@types/supertest": "^2.0.11",
-    "@types/bcrypt": "^5.0.0",
     "ajv": "^8.10.0",
     "ajv-formats": "^2.1.1",
     "bcrypt": "^5.0.1",
@@ -31,7 +31,7 @@
     "express-xml-bodyparser": "^0.3.0",
     "http-status-codes": "^2.2.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.2.3",
+    "mongoose": "^6.2.7",
     "morgan": "^1.10.0",
     "mustache": "^4.2.0",
     "passport": "^0.5.2",

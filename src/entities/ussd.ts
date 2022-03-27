@@ -10,9 +10,15 @@ type USSDPage = {
     name: string,
     context: string,
     level?: number,
+    options?: PageOption[],
     prev_page_name: string | null,
     next_page_name: string | null,
     type: 'END' | 'CONTINUE'
+}
+
+type PageOption = {
+    content: string,
+    next_page_name: string
 }
 
 type CustomerFeedbackPage = {

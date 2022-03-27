@@ -1,44 +1,39 @@
 import { USSDAppObjectService } from "../application/ports";
-import fs from 'fs'
-import path from 'path'
+import { Schema, model } from 'mongoose'
 
-var ussd_apps: USSDApp[] = JSON.parse(fs.readFileSync(path.join(__dirname, '../../fake_data/USSDApps.json'), 'utf-8'))
+const USSDAppSchema: Schema<USSDApp> = new Schema<USSDApp>({
+    name: { type: String, required: true },
+    shortcode: { type: String, required: true },
+})
+USSDAppSchema.set('toJSON', {
+    transform: (doc, ret, optios) => {
+        ret.id = ret._id,
+            delete ret._id,
+            delete ret.user_id,
+            delete ret.__v
+    }
+})
 
-try {
-    var max_id: number = Number(ussd_apps.reduce((prev, current) => {
-        return (Number(prev.id) > Number(current.id)) ? prev : current
-    }).id || 0)
-} catch (error) {
-    var max_id: number = 0
-}
-
-const writeToFile = async () => {
-    await fs.writeFile('fake_data/USSDApps.json', JSON.stringify(ussd_apps), () => { })
-}
+const USSDAppModel = model('USSD_App', USSDAppSchema)
 
 export const USSDAppObjectAdapter = (): USSDAppObjectService => {
     return {
         async createUSSDApp(ussd_app: USSDApp) {
-            max_id++
-            const new_ussd_app: USSDApp = { ...ussd_app, id: String(max_id) }
-            ussd_apps = [...ussd_apps, new_ussd_app]
-            await writeToFile()
-            return new_ussd_app
+            return await USSDAppModel.create(ussd_app)
         },
         async queryUSSDApp(query: any) {
-            return ussd_apps.find((ussd_app) => ussd_app.shortcode === query.shortcode) || null
+            return await USSDAppModel.findOne({ ...query })
         },
         async getUSSDApp(id: string) {
-            return ussd_apps.find((ussd_app) => ussd_app.id === id) || null
+            return await USSDAppModel.findOne({ _id: id }).exec()
         },
         async getUSSDApps() {
-            return ussd_apps
+            return USSDAppModel.find({})
         },
         async deleteUSSDApp(id: string) {
             return true
         },
         async updateUSSDApp(id: string, ussd_app: USSDApp) {
-            await writeToFile()
             return ussd_app
         }
     }

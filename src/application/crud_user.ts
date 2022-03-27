@@ -1,5 +1,6 @@
 import { UserObjectService } from "./ports";
 import bcrypt from 'bcrypt'
+import util from 'util'
 
 
 export const createUser = async (
@@ -43,7 +44,8 @@ export const getUser = async (
     UserObjectAdapter: UserObjectService
 ): Promise<User | null> => {
     try {
-        return await UserObjectAdapter.getUser(id)
+        const user = await UserObjectAdapter.getUser(id)
+        return user
     } catch (error) {
         console.log(error)
     }

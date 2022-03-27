@@ -55,7 +55,8 @@ export const createUSSDPage = async (
         }
         // previous page needs to know its next page
         prev_page.next_page_name = created_page.name
-        await USSDPageObjectsAdapter.updatePage(prev_page.id || null, prev_page)
+        const prev_page_update: USSDPageUpdate = prev_page
+        await USSDPageObjectsAdapter.updatePage(prev_page.id || null, prev_page_update)
 
         return created_page
         // one can never have 0 pages on an app. so no need to check for 0 pages and set level to 1

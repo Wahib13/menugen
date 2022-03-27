@@ -1,31 +1,41 @@
 import supertest from 'supertest'
 import { UserObjectAdapter } from '../../adapters/user_objects_adapter'
-import { app } from '../../app'
+import { app, initializeApp, terminateApp } from '../../app'
 import { hashPassword } from '../../application/crud_user'
+import { cleanup_db } from '../utils'
+
 
 const requestWithSuperTest = supertest(app)
 
+const database_name = 'test_user_controller'
+
+const test_user: User = {
+    id: null,
+    username: "testuser",
+    email: "test@test.com",
+    password: "awbaeir2438u",
+}
+
+const createTestUser = async (): Promise<User | null> => {
+
+    return await UserObjectAdapter().createUser({
+        id: null,
+        username: test_user.username,
+        password: await hashPassword(test_user.password || ''),
+        email: test_user.email
+    })
+}
+
 describe('User endpoints', () => {
 
-    var test_user: any = {
-        username: "testuser",
-        email: "test@test.com",
-        password: "awbaeir2438u",
-    }
-
     beforeAll(async () => {
-        UserObjectAdapter().createUser({
-            id: null,
-            username: test_user.username,
-            password: await hashPassword(test_user.password),
-            email: test_user.email
-        }).then((created_user) => test_user = { ...test_user, id: created_user?.id || null })
+        await initializeApp({ database_name: database_name })
+        await createTestUser()
     })
 
     afterAll(async () => {
-        if (test_user.id) {
-            await UserObjectAdapter().deleteUser(test_user.id)
-        }
+        await terminateApp()
+        await cleanup_db(database_name)
     })
 
     it('Create User, login and view user. user with different login should fail', async () => {
@@ -65,13 +75,4 @@ describe('User endpoints', () => {
         expect(res_get.body.password).not.toBe(null || undefined)
     })
 
-    // it('POST /api/users/ invalid request body should fail', async () => {
-    //     const res = await requestWithSuperTest.post('/api/users/')
-    //         .send({
-    //             username: "john",
-    //             raw_password: "secret2",
-    //             email: "invalidemailstring"
-    //         })
-    //     expect(res.status).toEqual(400)
-    // })
 })

@@ -1,8 +1,11 @@
+import mongoose from 'mongoose'
 import supertest from 'supertest'
-import { tedis } from '../../adapters/session_adapter'
 import { UserObjectAdapter } from '../../adapters/user_objects_adapter'
-import { app } from '../../app'
+import { app, initializeApp, terminateApp } from '../../app'
 import { hashPassword } from '../../application/crud_user'
+import { cleanup_db } from '../utils'
+
+const database_name = 'test_ussd_app_validator'
 
 const requestWithSuperTest = supertest(app)
 
@@ -41,12 +44,13 @@ const login = async (user: User) => {
 describe('USSD app endpoints', () => {
 
     beforeAll(async () => {
+        await initializeApp({ database_name: database_name })
         await createTestUser()
     })
 
     afterAll(async () => {
-        tedis.close()
-        // delete all users
+        await terminateApp()
+        await cleanup_db(database_name)
     })
 
     it('Validate USSD app creation. should fail with 40x error', async () => {

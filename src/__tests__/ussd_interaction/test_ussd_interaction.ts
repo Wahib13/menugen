@@ -1,12 +1,14 @@
 import supertest from "supertest";
 import { tedis } from "../../adapters/session_adapter";
-import { app } from "../../app";
+import { app, initializeApp, terminateApp } from "../../app";
 import xml2js from 'xml2js'
-import { getDefaultErrorFeedback } from "../../application/interact_customer";
 import { UserObjectAdapter } from "../../adapters/user_objects_adapter";
 import { hashPassword } from "../../application/crud_user";
-import { USSDAppObjectAdapter } from "../../adapters/ussd_app_objects_adapter";
-import { USSDPageObjectsAdapter } from "../../adapters/ussd_page_objects_adapter";
+import mongoose from "mongoose";
+import { cleanup_db } from "../utils";
+
+
+const database_name = 'test_ussd_interaction'
 
 const requestWithSuperTest = supertest(app)
 
@@ -36,7 +38,7 @@ const createTestUser = async (): Promise<User | null> => {
 
 const createTestUSSDPages = async (token: string) => {
     const test_create_ussd_app: USSDApp = {
-        shortcode: "*435*106#",
+        shortcode: "*435*107#",
         name: "test_ussd_app",
     }
     const res = await requestWithSuperTest
@@ -81,6 +83,7 @@ const login = async (user: User) => {
 describe('USSD interaction', () => {
 
     beforeAll(async () => {
+        await initializeApp({ database_name: database_name })
         // create the USSD AppxPages that will be used
         await createTestUser()
         const token = await login(test_user)
@@ -88,13 +91,14 @@ describe('USSD interaction', () => {
         await createTestUSSDPages(token)
     })
 
-    afterAll(() => {
-        tedis.close()
+    afterAll(async () => {
+        await terminateApp()
+        await cleanup_db(database_name)
     })
 
     const msisdn = '233202009098'
     const sessionid = '00011'
-    const shortcode = '*435*106#'
+    const shortcode = '*435*107#'
 
     it('USSD basic interaction', async () => {
         const xml_data: string =

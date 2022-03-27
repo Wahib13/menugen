@@ -8,6 +8,8 @@ import dotenv from 'dotenv'
 import { ussd_page_routes } from './routes/ussd_page_routes'
 import cors from 'cors'
 import { ussd_interaction_router } from './routes/ussd_interaction_routes'
+import { connect_db, disconnect_db } from './mongodb'
+import { tedis } from './adapters/session_adapter'
 
 dotenv.config()
 
@@ -17,6 +19,13 @@ export const SECRET = process.env.SECRET || ''
 if (!SECRET) {
     throw Error('app SECRET undefined. exiting')
 }
+
+
+const DATABASE_USERNAME = process.env.DATABASE_USERNAME || ''
+const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD || ''
+const DATABASE_HOST = process.env.DATABASE_HOST || ''
+const DATABASE_PORT = Number(process.env.DATABASE_PORT || 27017)
+const DATABASE_NAME = process.env.DATABASE_NAME || ''
 
 const corsOptions = {
     origin: ['http://localhost:3000', 'https://menugen-ui.vercel.app'],
@@ -44,3 +53,27 @@ app.use('/api/ussd_apps/', ussd_app_routes)
 app.use('/api/ussd_pages/', ussd_page_routes)
 
 app.use('/menu_gen/pull/', ussd_interaction_router)
+
+export const initializeApp = async (
+    { database_username = DATABASE_USERNAME,
+        database_password = DATABASE_PASSWORD,
+        database_host = DATABASE_HOST,
+        database_port = DATABASE_PORT,
+        database_name = DATABASE_NAME
+    }
+) => {
+    await connect_db(
+        database_username,
+        database_password,
+        database_host,
+        database_port,
+        database_name
+    )
+}
+
+export const terminateApp = async (
+
+) => {
+    await tedis.close()
+    await disconnect_db()
+}
