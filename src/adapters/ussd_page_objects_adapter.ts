@@ -1,12 +1,17 @@
 import { PageObjectService, USSDAppObjectService } from "../application/ports";
 import { Schema, model } from 'mongoose'
 
+const PageOptionSchema: Schema<PageOption> = new Schema<PageOption> ({
+    content: { type: String, required: true },
+    next_page_name: { type: String, required: false },
+})
+
 const PageSchema: Schema<USSDPage> = new Schema<USSDPage>({
     ussd_app_id: { type: String, required: false },
     name: { type: String, required: true },
     context: { type: String, required: false, default: '' },
     level: { type: Number, required: true },
-    options: { type: Array, required: true },
+    options: [PageOptionSchema],
     prev_page_name: { type: String, required: false, default: '' },
     next_page_name: { type: String, required: false, default: '' },
     type: { type: String, required: true },
@@ -34,6 +39,7 @@ const DEFAULT_ERROR_PAGE: USSDPage = {
     name: 'system_error_page',
     type: 'END',
     level: 1,
+    options: [],
     next_page_name: null,
     prev_page_name: null,
     ussd_app_id: anonymousApp.id || null
@@ -57,7 +63,7 @@ export const USSDPageObjectsAdapter = (): PageObjectService => {
             return await PageModel.findOne({ _id: id }).exec()
         },
         async createPage(page: USSDPage) {
-            const new_ussd_page: USSDPage = await PageModel.create({...page})
+            const new_ussd_page: USSDPage = await PageModel.create(page)
             return new_ussd_page
         },
         async updatePage(id: string | null, page_update: USSDPageUpdate) {

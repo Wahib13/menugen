@@ -29,6 +29,7 @@ export const createUSSDApp = async (
         name: 'intro',
         type: 'END',
         level: 1,
+        options: [],
         ussd_app_id: new_ussd_app.id || null,
         next_page_name: null,
         prev_page_name: null

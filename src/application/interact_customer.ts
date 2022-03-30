@@ -88,9 +88,27 @@ export const getRawPage = (
     customer_session: CustomerSession
 ): CustomerFeedbackPage => {
 
-    return {
-        content: page.context,
-        type: page.type
+    console.log(`page options ${page.options}`)
+
+    // append options
+    if (page.options.length > 0) {
+        const options: string[] = page.options.map((option) => option.content)
+        const options_combined: string = options.reduce(
+            (
+                prev_value: string,
+                current_option: string,
+                current_index: number
+            ) => prev_value + '\n' + String(current_index + 1) + '. ' + current_option, '')
+        
+        return {
+            content: page.context + options_combined,
+            type: page.type
+        }
+    } else {
+        return {
+            content: page.context,
+            type: page.type
+        }
     }
 }
 

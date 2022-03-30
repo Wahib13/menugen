@@ -10,7 +10,7 @@ type USSDPage = {
     name: string,
     context: string,
     level?: number,
-    options?: PageOption[],
+    options: PageOption[],
     prev_page_name: string | null,
     next_page_name: string | null,
     type: 'END' | 'CONTINUE'

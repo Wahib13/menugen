@@ -80,6 +80,7 @@ describe('USSD Page Endpoints', () => {
             name: 'second_page',
             prev_page_name: 'intro',
             type: 'END',
+            options: [],
             ussd_app_id: res.body.id,
             next_page_name: null
         }
@@ -87,7 +88,7 @@ describe('USSD Page Endpoints', () => {
             .post('/api/ussd_pages/')
             .set('Authorization', `Bearer ${token}`)
             .send(test_create_ussd_page)
-        // console.log(res_create_page.body)
+        console.log(res_create_page.body)
         expect(res_create_page.status).toEqual(201)
         expect(res_create_page.body.id).not.toBe(null || undefined)
         expect(res_create_page.body.context).toEqual(test_create_ussd_page.context)
@@ -105,6 +106,12 @@ describe('USSD Page Endpoints', () => {
             name: 'third_page',
             prev_page_name: 'second_page',
             type: 'END',
+            options: [
+                {
+                    content: 'one lonely option',
+                    next_page_name: ''
+                }
+            ],
             ussd_app_id: res.body.id,
             next_page_name: null
         }
@@ -119,6 +126,7 @@ describe('USSD Page Endpoints', () => {
         expect(res_get_page2.status).toEqual(200)
         expect(res_get_page2.body.name).toEqual(test_create_ussd_page2.name)
         expect(res_get_page2.body.level).toEqual(res_get_page.body.level + 1)
+        expect(res_get_page2.body.options.length).toBeGreaterThan(0)
 
         const res_get_page1 = await requestWithSuperTest
             .get(`/api/ussd_pages/${res_create_page.body.id}`)

@@ -8,6 +8,7 @@ export const addUSSDPage = async (req: express.Request, res: express.Response) =
     const new_ussd_page: USSDPage = {
         context: req.body.context,
         name: req.body.name,
+        options: req.body.options,
         type: req.body.type || 'END',
         ussd_app_id: req.body.ussd_app_id,
         prev_page_name: req.body.prev_page_name,

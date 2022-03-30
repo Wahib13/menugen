@@ -73,6 +73,7 @@ describe('USSD Page Endpoints', () => {
             name: 'second_page',
             prev_page_name: 'intro',
             type: 'END',
+            options: [],
             ussd_app_id: res.body.id,
             next_page_name: null
         }

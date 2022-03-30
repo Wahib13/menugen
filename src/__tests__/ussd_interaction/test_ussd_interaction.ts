@@ -4,8 +4,6 @@ import xml2js from 'xml2js'
 import { UserObjectAdapter } from "../../adapters/user_objects_adapter";
 import { hashPassword } from "../../application/crud_user";
 import { cleanup_db } from "../utils";
-import fs from 'fs'
-import path from 'path'
 import Mustache from "mustache";
 
 
@@ -52,6 +50,16 @@ const createTestUSSDPages = async (token: string) => {
         name: 'second_page',
         prev_page_name: 'intro',
         type: 'END',
+        options: [
+            {
+                content: 'not very well',
+                next_page_name: ''
+            },
+            {
+                content: 'doing well',
+                next_page_name: ''
+            }
+        ],
         ussd_app_id: res.body.id,
         next_page_name: null
     }
@@ -115,7 +123,7 @@ describe('USSD interaction', () => {
             sessionid: sessionid,
             msg: '1',
             type: '2'
-        }, 'how be', '3')()
+        }, 'how be\n1. not very well\n2. doing well', '3')()
     })
 
     it('USSD basic xml validation', async () => {

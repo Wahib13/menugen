@@ -10,26 +10,37 @@ const createUSSDPageSchema = {
         context: { type: "string" },
         prev_page_name: { type: "string" },
         next_page_name: { type: "string", nullable: true },
-        type: { type: "string", enum: ["END", "CONTINUE"] }
+        type: { type: "string", enum: ["END", "CONTINUE"] },
+        options: {
+            type: "array",
+            // nullable: true,
+            items: {
+                type: "object",
+                properties: {
+                    content: { type: "string" },
+                    next_page_name: { type: "string" }
+                }
+            }
+        }
     },
     required: ["ussd_app_id", "name", "context", "prev_page_name"],
     additionalProperties: false,
-    anyOf: [
-        {
-            properties: {
-                options: {
-                    type: "array",
-                    items: {
-                        type: "object",
-                        properties: {
-                            content: { type: "string" },
-                            next_page_name: { type: "string" }
-                        }
-                    }
-                }
-            },
-        }
-    ]
+    // oneOf: [
+    //     {
+    //         properties: {
+    //             options: {
+    //                 type: "array",
+    //                 items: {
+    //                     type: "object",
+    //                     properties: {
+    //                         content: { type: "string" },
+    //                         next_page_name: { type: "string" }
+    //                     }
+    //                 }
+    //             }
+    //         },
+    //     }
+    // ],
 }
 
 
