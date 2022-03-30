@@ -1,11 +1,12 @@
 import supertest from "supertest";
-import { tedis } from "../../adapters/session_adapter";
 import { app, initializeApp, terminateApp } from "../../app";
 import xml2js from 'xml2js'
 import { UserObjectAdapter } from "../../adapters/user_objects_adapter";
 import { hashPassword } from "../../application/crud_user";
-import mongoose from "mongoose";
 import { cleanup_db } from "../utils";
+import fs from 'fs'
+import path from 'path'
+import Mustache from "mustache";
 
 
 const database_name = 'test_ussd_interaction'
@@ -101,47 +102,20 @@ describe('USSD interaction', () => {
     const shortcode = '*435*107#'
 
     it('USSD basic interaction', async () => {
-        const xml_data: string =
-            `<ussd>
-            <msisdn>${msisdn}</msisdn>
-            <sessionid>${sessionid}</sessionid>
-            <type>1</type>
-            <msg>${shortcode}</msg>
-        </ussd>`
+        
+        await ussd_interaction_test({
+            msisdn: msisdn,
+            sessionid: sessionid,
+            msg: shortcode,
+            type: '1'
+        }, '', '2')()
 
-        const xml_data2: string =
-            `<ussd>
-            <msisdn>${msisdn}</msisdn>
-            <sessionid>${sessionid}</sessionid>
-            <type>2</type>
-            <msg>1</msg>
-        </ussd>`
-
-        const res = await requestWithSuperTest
-            .post('/menu_gen/pull/')
-            .set('Content-Type', 'application/xml')
-            .send(xml_data)
-        console.log(res.text)
-        xml2js.parseString(res.text, (err, result) => {
-            console.log(result)
-            expect(result.ussd.msisdn[0]).toEqual(msisdn)
-            expect(result.ussd.sessionid[0]).toEqual(sessionid)
-            expect(result.ussd.msg[0]).toEqual('')
-        })
-        expect(res.status).toEqual(200)
-
-        const res2 = await requestWithSuperTest
-            .post('/menu_gen/pull/')
-            .set('Content-Type', 'application/xml')
-            .send(xml_data2)
-        console.log(res2.text)
-        xml2js.parseString(res2.text, (err, result) => {
-            console.log(result)
-            expect(result.ussd.msisdn[0]).toEqual(msisdn)
-            expect(result.ussd.sessionid[0]).toEqual(sessionid)
-            expect(result.ussd.msg[0]).toEqual('how be')
-        })
-        expect(res2.status).toEqual(200)
+        await ussd_interaction_test({
+            msisdn: msisdn,
+            sessionid: sessionid,
+            msg: '1',
+            type: '2'
+        }, 'how be', '3')()
     })
 
     it('USSD basic xml validation', async () => {
@@ -159,3 +133,28 @@ describe('USSD interaction', () => {
         expect(res.status).toEqual(400)
     })
 })
+
+const ussd_interaction_test = (view: ViewUSSDRequest, expected_msg: string, expected_msg_type: string) => {
+    return async () => {
+        const xml_template = 
+        `<ussd>
+            <msisdn>{{msisdn}}</msisdn>
+            <sessionid>{{sessionid}}</sessionid>
+            <type>{{type}}</type>
+            <msg>{{msg}}</msg>
+        </ussd>`
+        const res = await requestWithSuperTest
+            .post('/menu_gen/pull/')
+            .set('Content-Type', 'application/xml')
+            .send(Mustache.render(xml_template, view))
+        xml2js.parseString(res.text, (err, result) => {
+            console.log(res.text)
+            console.log(result)
+            expect(result.ussd.msisdn[0]).toEqual(view.msisdn)
+            expect(result.ussd.sessionid[0]).toEqual(view.sessionid)
+            expect(result.ussd.msg[0]).toEqual(expected_msg)
+            expect(result.ussd.type[0]).toEqual(expected_msg_type)
+        })
+        expect(res.status).toEqual(200)
+    }
+}
