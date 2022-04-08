@@ -12,4 +12,4 @@ ussd_page_routes.use(loginRequiredMiddleware)
 
 ussd_page_routes.route('/').get(showUSSDPages)
 ussd_page_routes.route('/').post(createUSSDPageValidator, addUSSDPage)
-ussd_page_routes.route('/:id').get(showUSSDPage).put(updateUSSDPage).delete(deleteUSSDPage)
+ussd_page_routes.route('/:ussd_app_id/:ussd_page_name').get(showUSSDPage).put(updateUSSDPage).delete(deleteUSSDPage)

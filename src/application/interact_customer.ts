@@ -70,16 +70,27 @@ const getNextPage = async (
     USSDAppObjectAdapter: USSDAppObjectService
 ): Promise<USSDPage | null> => {
 
+    if (current_page.options.length > 0) {
+        try {
+            const chosen_option_position: number = Number(input_message)
+            const chosen_option: PageOption = current_page.options[chosen_option_position - 1]
+            const next_page_name = chosen_option.next_page_name
+
+            const page = await pageObjectAdapter.findPage(shortcode, next_page_name, USSDAppObjectAdapter)
+            return page
+        } catch (error) {
+            console.log(`resolving via page option failed. trying next_page_name: 
+            ${current_page.next_page_name} on current page: ${current_page}`)
+        }
+    }
+
     const next_page_name = current_page.next_page_name || null
-    if (!next_page_name == null) {
+    if (!next_page_name) {
         console.log(`next page name is null`)
         return null
     }
-    console.log(`detected next page name: ${next_page_name}`)
+
     const page = await pageObjectAdapter.findPage(shortcode, next_page_name, USSDAppObjectAdapter)
-    console.log(`detected next page id: ${page.name}`)
-    console.log(`detected next page id: ${page.id}`)
-    console.log(`detected next page id: ${page.context}`)
     return page
 }
 
@@ -87,8 +98,6 @@ export const getRawPage = (
     page: USSDPage,
     customer_session: CustomerSession
 ): CustomerFeedbackPage => {
-
-    console.log(`page options ${page.options}`)
 
     // append options
     if (page.options.length > 0) {
@@ -99,7 +108,7 @@ export const getRawPage = (
                 current_option: string,
                 current_index: number
             ) => prev_value + '\n' + String(current_index + 1) + '. ' + current_option, '')
-        
+
         return {
             content: page.context + options_combined,
             type: page.type

@@ -53,18 +53,42 @@ const createTestUSSDPages = async (token: string) => {
         options: [
             {
                 content: 'not very well',
-                next_page_name: ''
+                next_page_name: 'sick_page'
             },
             {
                 content: 'doing well',
-                next_page_name: ''
+                next_page_name: 'healthy page'
             }
         ],
         ussd_app_id: res.body.id,
         next_page_name: null
     }
-    const res_create_page = await requestWithSuperTest
-        .post('/api/ussd_pages/')
+    const test_create_ussd_page2: USSDPage = {
+        context: 'sorry about that',
+        name: 'sick_page',
+        prev_page_name: 'sick_option',
+        type: 'END',
+        options: [],
+        ussd_app_id: res.body.id,
+        next_page_name: null
+    }
+    const test_create_ussd_page3: USSDPage = {
+        context: 'congratulations on your good health',
+        name: 'healthy_page',
+        prev_page_name: 'healthy_option',
+        type: 'END',
+        options: [],
+        ussd_app_id: res.body.id,
+        next_page_name: null
+    }
+    await requestWithSuperTest
+        .put(`/api/ussd_pages/${res.body.id}/intro`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+            next_page_name: 'second_page'
+        })
+    await requestWithSuperTest
+        .put(`/api/ussd_pages/${res.body.id}/second_page`)
         .set('Authorization', `Bearer ${token}`)
         .send(test_create_ussd_page)
     // check default page when app is created
@@ -110,7 +134,7 @@ describe('USSD interaction', () => {
     const shortcode = '*435*107#'
 
     it('USSD basic interaction', async () => {
-        
+
         await ussd_interaction_test({
             msisdn: msisdn,
             sessionid: sessionid,
@@ -123,7 +147,14 @@ describe('USSD interaction', () => {
             sessionid: sessionid,
             msg: '1',
             type: '2'
-        }, 'how be\n1. not very well\n2. doing well', '3')()
+        }, 'how be\n1. not very well\n2. doing well', '2')()
+
+        // await ussd_interaction_test({
+        //     msisdn: msisdn,
+        //     sessionid: sessionid,
+        //     msg: '2',
+        //     type: '2'
+        // }, 'congratulations on your good health', '3')()
     })
 
     it('USSD basic xml validation', async () => {
@@ -144,8 +175,8 @@ describe('USSD interaction', () => {
 
 const ussd_interaction_test = (view: ViewUSSDRequest, expected_msg: string, expected_msg_type: string) => {
     return async () => {
-        const xml_template = 
-        `<ussd>
+        const xml_template =
+            `<ussd>
             <msisdn>{{msisdn}}</msisdn>
             <sessionid>{{sessionid}}</sessionid>
             <type>{{type}}</type>

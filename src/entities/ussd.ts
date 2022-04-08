@@ -28,6 +28,8 @@ type CustomerFeedbackPage = {
 
 type USSDPageUpdate = {
     name?: string,
+    next_page_name?: string | null,
+    options?: PageOption[],
     context?: string,
     type?: 'END' | 'CONTINUE'
 }

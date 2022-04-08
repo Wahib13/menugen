@@ -68,38 +68,14 @@ describe('USSD Page Endpoints', () => {
         expect(res.body.shortcode).toEqual(test_create_ussd_app.shortcode)
         expect(res.body.id).not.toBe(null || undefined)
 
-        const test_create_ussd_page: USSDPage = {
-            context: 'hello',
-            name: 'second_page',
-            prev_page_name: 'intro',
-            type: 'END',
-            options: [],
-            ussd_app_id: res.body.id,
-            next_page_name: null
-        }
-        const res_create_page = await requestWithSuperTest
-            .post('/api/ussd_pages/')
-            .set('Authorization', `Bearer ${token}`)
-            .send(test_create_ussd_page)
-        expect(res_create_page.status).toEqual(201)
-        expect(res_create_page.body.id).not.toBe(null || undefined)
-        expect(res_create_page.body.context).toEqual(test_create_ussd_page.context)
-
         const res_delete_page = await requestWithSuperTest
-            .delete(`/api/ussd_pages/${res_create_page.body.id}`)
+            .delete(`/api/ussd_pages/${res.body.id}/intro`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_delete_page.status).toEqual(http_status_codes.OK)
 
         const res_get_page = await requestWithSuperTest
-            .get(`/api/ussd_pages/${res_create_page.body.id}`)
+            .get(`/api/ussd_pages/${res.body.id}/intro`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_page.status).toEqual(http_status_codes.NOT_FOUND)
-
-
-        const res_get_all_pages = await requestWithSuperTest
-            .get(`/api/ussd_pages?app_id=${res.body.id}`)
-            .set('Authorization', `Bearer ${token}`)
-        expect(res_get_all_pages.status).toEqual(200)
-        expect(res_get_all_pages.body[0].next_page_name).toEqual(null)
     })
 })

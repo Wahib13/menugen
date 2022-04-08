@@ -47,8 +47,9 @@ export const showUSSDPages = async (req: express.Request, res: express.Response)
 }
 
 export const showUSSDPage = async (req: express.Request, res: express.Response) => {
+    const { ussd_app_id, ussd_page_name } = req.params
     try {
-        const ussd_page = await getUSSDPage(req.params.id, USSDPageObjectsAdapter())
+        const ussd_page = await getUSSDPage(ussd_app_id, ussd_page_name, USSDPageObjectsAdapter())
         if (!ussd_page) {
             throw Error('USSD page not found')
         }
@@ -62,9 +63,16 @@ export const showUSSDPage = async (req: express.Request, res: express.Response) 
 }
 
 export const updateUSSDPage = async (req: express.Request, res: express.Response) => {
+    const { ussd_app_id, ussd_page_name } = req.params
     try {
         const page_update: USSDPageUpdate = { ...req.body }
-        const updated_ussd_page = await updatePage(req.params.id, page_update, USSDPageObjectsAdapter(), USSDAppObjectAdapter())
+        const updated_ussd_page = await updatePage(
+            ussd_app_id,
+            ussd_page_name,
+            page_update,
+            USSDPageObjectsAdapter(),
+            USSDAppObjectAdapter()
+        )
         if (!updated_ussd_page) {
             throw Error('USSD Page update failed')
         }
@@ -77,8 +85,9 @@ export const updateUSSDPage = async (req: express.Request, res: express.Response
 }
 
 export const deleteUSSDPage = async (req: express.Request, res: express.Response) => {
+    const { ussd_app_id, ussd_page_name } = req.params
     try {
-        const delete_page_result = await deletePage(req.params.id, USSDPageObjectsAdapter())
+        const delete_page_result = await deletePage(ussd_app_id, ussd_page_name, USSDPageObjectsAdapter())
         if (!delete_page_result) {
             throw Error(`page id ${req.params.id} not found`)
         }

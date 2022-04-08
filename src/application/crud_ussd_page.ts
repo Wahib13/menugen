@@ -1,3 +1,4 @@
+import { USSDAppObjectAdapter } from "../adapters/ussd_app_objects_adapter";
 import { PageObjectService, USSDAppObjectService } from "./ports";
 
 export const createUSSDPage = async (
@@ -6,9 +7,6 @@ export const createUSSDPage = async (
     USSDAppObjectAdapter: USSDAppObjectService
 ): Promise<USSDPage | null> => {
 
-    if (!ussd_page.prev_page_name) {
-        throw Error('previous page required')
-    }
     if (!ussd_page.ussd_app_id) {
         throw Error('ussd_app_id not defined')
     }
@@ -21,6 +19,7 @@ export const createUSSDPage = async (
         const existing_page_name_clash: USSDPage | null = await USSDPageObjectsAdapter.queryPage(
             {
                 name: ussd_page.name,
+                // ussd_app_id: ussd_page.ussd_app_id
                 ussd_app_id: ussd_app.id
             }
         )
@@ -28,35 +27,11 @@ export const createUSSDPage = async (
             throw Error(`existing page name clash on name: ${ussd_page.name}, 
             shortcode: ${ussd_app.shortcode}. page id: ${existing_page_name_clash.id}`)
         }
-        const prev_page: USSDPage | null = await USSDPageObjectsAdapter.queryPage(
-            {
-                name: ussd_page.prev_page_name,
-                ussd_app_id: ussd_app.id
-            })
 
-        if (!prev_page) {
-            throw Error(`previous page with name: ${ussd_page.prev_page_name} 
-            not found on app with shortcode ${ussd_app.shortcode}`)
-        }
-        if (prev_page.next_page_name) {
-            throw Error(`previous page with name: ${prev_page.name} already has a next page: ${prev_page.next_page_name}`)
-        }
-
-        prev_page.next_page_name = ussd_page.name
-        prev_page.type = 'CONTINUE'
-
-        if (!prev_page.level) {
-            throw Error(`previous page level is undefined`)
-        }
-        ussd_page.level = prev_page.level + 1
         const created_page: USSDPage | null = await USSDPageObjectsAdapter.createPage(ussd_page)
         if (!created_page) {
             throw Error(`page creation failed`)
         }
-        // previous page needs to know its next page
-        prev_page.next_page_name = created_page.name
-        const prev_page_update: USSDPageUpdate = prev_page
-        await USSDPageObjectsAdapter.updatePage(prev_page.id || null, prev_page_update)
 
         return created_page
         // one can never have 0 pages on an app. so no need to check for 0 pages and set level to 1
@@ -68,11 +43,20 @@ export const createUSSDPage = async (
 }
 
 export const getUSSDPage = async (
-    id: string,
-    USSDPageObjectsAdapter: PageObjectService
+    ussd_app_id: string,
+    ussd_page_name: string,
+    USSDPageObjectsAdapter: PageObjectService,
 ): Promise<USSDPage | null> => {
+    console.log(ussd_app_id)
+    console.log(ussd_page_name)
     try {
-        const ussd_page: USSDPage | null = await USSDPageObjectsAdapter.getPage(id)
+        const ussd_page: USSDPage | null = await USSDPageObjectsAdapter.queryPage(
+            {
+                ussd_app_id: ussd_app_id,
+                name: ussd_page_name
+            }
+        )
+        console.log(ussd_page)
         return ussd_page
     } catch (error) {
         console.log(error)
@@ -94,18 +78,24 @@ export const getUSSDPages = async (
 }
 
 export const updatePage = async (
-    id: string,
+    ussd_app_id: string,
+    ussd_page_name: string,
     page_update: USSDPageUpdate,
     USSDPageObjectsAdapter: PageObjectService,
     USSDAppObjectAdapter: USSDAppObjectService
 ): Promise<USSDPage | null> => {
     try {
-        const existing_page: USSDPage | null = await USSDPageObjectsAdapter.getPage(id)
+        const existing_page: USSDPage | null = await USSDPageObjectsAdapter.queryPage(
+            {
+                ussd_app_id: ussd_app_id,
+                name: ussd_page_name
+            }
+        )
         if (!existing_page) {
-            throw Error(`page with id: ${id} does not exist`)
+            throw Error(`ussd page not found. ussd_app_id: ${ussd_app_id}, page_name: ${ussd_page_name}`)
         }
         if (!existing_page.ussd_app_id) {
-            throw Error(`page with id: ${id} does not have a USSD App`)
+            throw Error(`ussd page app_id not found. ussd_app_id: ${ussd_app_id}, page_name: ${ussd_page_name}`)
         }
         const ussd_app: USSDApp | null = await USSDAppObjectAdapter.getUSSDApp(existing_page.ussd_app_id)
         if (!ussd_app) {
@@ -118,11 +108,50 @@ export const updatePage = async (
                 ussd_app_id: ussd_app.id
             }
         )
-        if (existing_page_name_clash) {
+        if (existing_page_name_clash && existing_page_name_clash.id != existing_page.id) {
             throw Error(`existing page name clash on name: ${existing_page.name}, 
             shortcode: ${ussd_app.shortcode}. page id: ${existing_page_name_clash.id}`)
         }
-        const updated_page: USSDPage | null = await USSDPageObjectsAdapter.updatePage(id, page_update)
+
+        if (page_update.options && page_update.options.length > 0) {
+            page_update.type = 'CONTINUE'
+            for (let i = 0; i < page_update.options.length; i++) {
+                const next_page: USSDPage | null = await createUSSDPage({
+                    name: page_update.options[i].next_page_name,
+                    context: '',
+                    next_page_name: null,
+                    prev_page_name: null,
+                    options: [],
+                    type: "END",
+                    ussd_app_id: existing_page.ussd_app_id,
+                    level: existing_page.level || 0 + 1
+                }, USSDPageObjectsAdapter, USSDAppObjectAdapter)
+                if (!next_page) {
+                    // page creation failed due to name clash?
+                    continue
+                    // throw Error(`page update failed. next page: ${page_update.options[i].next_page_name} creation failed`)
+                }
+            }
+        }
+
+        if (page_update.next_page_name && page_update.next_page_name != existing_page.next_page_name) {
+            page_update.type = 'CONTINUE'
+            const next_page: USSDPage | null = await createUSSDPage({
+                name: page_update.next_page_name,
+                context: '',
+                next_page_name: null,
+                prev_page_name: null,
+                options: [],
+                type: "END",
+                ussd_app_id: existing_page.ussd_app_id,
+                level: existing_page.level || 0 + 1
+            }, USSDPageObjectsAdapter, USSDAppObjectAdapter)
+            if (!next_page) {
+                throw Error(`page update failed. next page: ${page_update.next_page_name} creation failed`)
+            }
+        }
+
+        const updated_page: USSDPage | null = await USSDPageObjectsAdapter.updatePage(existing_page.id || '', page_update)
         return updated_page
     } catch (error) {
         console.log(error)
@@ -130,13 +159,18 @@ export const updatePage = async (
     }
 }
 
-export const deletePage = async (id: string, USSDPageObjectsAdapter: PageObjectService): Promise<boolean> => {
+export const deletePage = async (ussd_app_id: string, name: string, USSDPageObjectsAdapter: PageObjectService): Promise<boolean> => {
     try {
-        const existing_page: USSDPage | null = await USSDPageObjectsAdapter.getPage(id)
+        const existing_page: USSDPage | null = await USSDPageObjectsAdapter.queryPage(
+            {
+                name: name,
+                ussd_app_id: ussd_app_id
+            }
+        )
         if (!existing_page) {
             return false
         }
-        const delete_result: boolean = await USSDPageObjectsAdapter.deletePage(id)
+        const delete_result: boolean = await USSDPageObjectsAdapter.deletePage(existing_page.id || '')
         const prev_page: USSDPage | null = await USSDPageObjectsAdapter.queryPage(
             {
                 name: existing_page.prev_page_name,

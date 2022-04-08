@@ -40,7 +40,7 @@ const login = async (user: User) => {
 }
 
 describe('USSD Page Endpoints', () => {
-    
+
     beforeAll(async () => {
         await initializeApp({ database_name: database_name })
         await createTestUser()
@@ -67,34 +67,83 @@ describe('USSD Page Endpoints', () => {
         expect(res.body.shortcode).toEqual(test_create_ussd_app.shortcode)
         expect(res.body.id).not.toBe(null || undefined)
 
-        const test_create_ussd_page: USSDPage = {
-            context: 'hello',
-            name: 'third_page',
-            prev_page_name: 'intro',
-            type: 'END',
-            options: [],
-            ussd_app_id: res.body.id,
-            next_page_name: null
-        }
-        const res_create_page = await requestWithSuperTest
-            .post('/api/ussd_pages/')
+        // check the default page is created
+        const res_get_page = await requestWithSuperTest
+            .get(`/api/ussd_pages/${res.body.id}/intro`)
             .set('Authorization', `Bearer ${token}`)
-            .send(test_create_ussd_page)
-        expect(res_create_page.status).toEqual(201)
-        expect(res_create_page.body.id).not.toBe(null || undefined)
-        expect(res_create_page.body.context).toEqual(test_create_ussd_page.context)
-
+        expect(res_get_page.body.ussd_app_id).toEqual(res.body.id)
+        expect(res_get_page.body.name).toEqual('intro')
         const test_update_ussd_page: USSDPageUpdate = {
             context: 'hello from the other side!',
-            name: 'not_third_page',
-            type: 'CONTINUE',
+            name: 'intro',
+            next_page_name: 'page2',
+            // type: 'CONTINUE',
         }
         const res_update_page = await requestWithSuperTest
-            .put(`/api/ussd_pages/${res_create_page.body.id}`)
+            .put(`/api/ussd_pages/${res.body.id}/intro`)
             .set('Authorization', `Bearer ${token}`)
             .send(test_update_ussd_page)
         expect(res_update_page.status).toEqual(200)
         expect(res_update_page.body.name).toEqual(test_update_ussd_page.name)
-        expect(res_update_page.body.type).toEqual(test_update_ussd_page.type)
+        expect(res_update_page.body.type).toEqual('CONTINUE')
+
+        const res_get_new_page = await requestWithSuperTest
+            .get(`/api/ussd_pages/${res.body.id}/page2`)
+            .set('Authorization', `Bearer ${token}`)
+        expect(res_get_new_page.status).toEqual(200)
+        expect(res_get_new_page.body.name).toEqual('page2')
+    })
+
+    it('Update a page with options. Requires an existing page', async () => {
+        const token = await login(test_user)
+
+        const test_create_ussd_app: USSDApp = {
+            shortcode: "*435*103#",
+            name: "test_ussd_app",
+        }
+        const res = await requestWithSuperTest
+            .post('/api/ussd_apps/')
+            .set('Authorization', `Bearer ${token}`)
+            .send(test_create_ussd_app)
+        const test_update_ussd_page: USSDPageUpdate = {
+            context: 'how are you feeling today',
+            name: 'intro',
+            options: [
+                {
+                    next_page_name: 'happy_page',
+                    content: 'feeling happy'
+                },
+                {
+                    next_page_name: 'sad_page',
+                    content: 'feeling sad'
+                }
+            ],
+            // type: 'CONTINUE',
+        }
+        const res_update_page = await requestWithSuperTest
+            .put(`/api/ussd_pages/${res.body.id}/intro`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(test_update_ussd_page)
+        expect(res_update_page.status).toEqual(200)
+
+        // get back page to see if it was updated
+        const res_get_page = await requestWithSuperTest
+            .get(`/api/ussd_pages/${res.body.id}/intro`)
+            .set('Authorization', `Bearer ${token}`)
+        expect(res_get_page.status).toEqual(200)
+        expect(res_get_page.body.options.length).toBeGreaterThan(0)
+        expect(res_get_page.body.type).toBe('CONTINUE')
+
+        // if new pages were created
+        const res_get_new_page1 = await requestWithSuperTest
+            .get(`/api/ussd_pages/${res.body.id}/happy_page`)
+            .set('Authorization', `Bearer ${token}`)
+        expect(res_get_new_page1.status).toEqual(200)
+        expect(res_get_new_page1.body.name).toBe('happy_page')
+        const res_get_new_page2 = await requestWithSuperTest
+            .get(`/api/ussd_pages/${res.body.id}/sad_page`)
+            .set('Authorization', `Bearer ${token}`)
+        expect(res_get_new_page2.status).toEqual(200)
+        expect(res_get_new_page2.body.name).toBe('sad_page')
     })
 })

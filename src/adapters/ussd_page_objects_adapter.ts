@@ -50,7 +50,7 @@ const DEFAULT_ERROR_PAGE: USSDPage = {
 export const USSDPageObjectsAdapter = (): PageObjectService => {
     return {
         async queryPage(query: any) {
-            return await PageModel.findOne(query)
+            return await PageModel.findOne({...query})
         },
         async findPage(shortcode: string, page_name: string, USSDAppObjectAdapter: USSDAppObjectService) {
             const ussd_app = await USSDAppObjectAdapter.queryUSSDApp({ shortcode: shortcode })
