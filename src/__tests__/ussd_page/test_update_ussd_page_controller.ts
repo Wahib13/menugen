@@ -92,6 +92,7 @@ describe('USSD Page Endpoints', () => {
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_new_page.status).toEqual(200)
         expect(res_get_new_page.body.name).toEqual('page2')
+        expect(res_get_new_page.body.level).toEqual(2)
     })
 
     it('Update a page with options. Requires an existing page', async () => {
@@ -118,7 +119,6 @@ describe('USSD Page Endpoints', () => {
                     content: 'feeling sad'
                 }
             ],
-            // type: 'CONTINUE',
         }
         const res_update_page = await requestWithSuperTest
             .put(`/api/ussd_pages/${res.body.id}/intro`)
@@ -140,10 +140,11 @@ describe('USSD Page Endpoints', () => {
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_new_page1.status).toEqual(200)
         expect(res_get_new_page1.body.name).toBe('happy_page')
+        expect(res_get_new_page1.body.level).toEqual(2)
         const res_get_new_page2 = await requestWithSuperTest
             .get(`/api/ussd_pages/${res.body.id}/sad_page`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_new_page2.status).toEqual(200)
-        expect(res_get_new_page2.body.name).toBe('sad_page')
+        expect(res_get_new_page2.body.level).toEqual(2)
     })
 })

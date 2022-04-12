@@ -124,7 +124,7 @@ export const updatePage = async (
                     options: [],
                     type: "END",
                     ussd_app_id: existing_page.ussd_app_id,
-                    level: existing_page.level || 0 + 1
+                    level: (existing_page.level || 0) + 1
                 }, USSDPageObjectsAdapter, USSDAppObjectAdapter)
                 if (!next_page) {
                     // page creation failed due to name clash?
@@ -144,7 +144,7 @@ export const updatePage = async (
                 options: [],
                 type: "END",
                 ussd_app_id: existing_page.ussd_app_id,
-                level: existing_page.level || 0 + 1
+                level: (existing_page.level || 0) + 1
             }, USSDPageObjectsAdapter, USSDAppObjectAdapter)
             if (!next_page) {
                 throw Error(`page update failed. next page: ${page_update.next_page_name} creation failed`)
