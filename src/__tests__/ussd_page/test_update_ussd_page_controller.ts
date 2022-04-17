@@ -141,10 +141,12 @@ describe('USSD Page Endpoints', () => {
         expect(res_get_new_page1.status).toEqual(200)
         expect(res_get_new_page1.body.name).toBe('happy_page')
         expect(res_get_new_page1.body.level).toEqual(2)
+        expect(res_get_new_page1.body.prev_page_name).toEqual('intro')
         const res_get_new_page2 = await requestWithSuperTest
             .get(`/api/ussd_pages/${res.body.id}/sad_page`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_new_page2.status).toEqual(200)
         expect(res_get_new_page2.body.level).toEqual(2)
+        expect(res_get_new_page1.body.prev_page_name).toEqual('intro')
     })
 })

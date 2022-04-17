@@ -68,14 +68,42 @@ describe('USSD Page Endpoints', () => {
         expect(res.body.shortcode).toEqual(test_create_ussd_app.shortcode)
         expect(res.body.id).not.toBe(null || undefined)
 
+        // update intro page to include options
+        const test_update_ussd_page: USSDPageUpdate = {
+            context: 'how are you feeling today',
+            name: 'intro',
+            options: [
+                {
+                    next_page_name: 'happy_page',
+                    content: 'feeling happy'
+                },
+                {
+                    next_page_name: 'sad_page',
+                    content: 'feeling sad'
+                }
+            ],
+        }
+
+        const res_update_page = await requestWithSuperTest
+            .put(`/api/ussd_pages/${res.body.id}/intro`)
+            .set('Authorization', `Bearer ${token}`)
+            .send(test_update_ussd_page)
+        expect(res_update_page.status).toEqual(200)
+
         const res_delete_page = await requestWithSuperTest
-            .delete(`/api/ussd_pages/${res.body.id}/intro`)
+            .delete(`/api/ussd_pages/${res.body.id}/happy_page`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_delete_page.status).toEqual(http_status_codes.OK)
 
         const res_get_page = await requestWithSuperTest
-            .get(`/api/ussd_pages/${res.body.id}/intro`)
+            .get(`/api/ussd_pages/${res.body.id}/happy_page`)
             .set('Authorization', `Bearer ${token}`)
         expect(res_get_page.status).toEqual(http_status_codes.NOT_FOUND)
+
+        const res_get_intro_page = await requestWithSuperTest
+            .get(`/api/ussd_pages/${res.body.id}/intro`)
+            .set('Authorization', `Bearer ${token}`)
+        expect(res_get_intro_page.status).toEqual(http_status_codes.OK)
+        expect(res_get_intro_page.body.options.length).toEqual(1)
     })
 })

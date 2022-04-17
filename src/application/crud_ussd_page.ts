@@ -120,7 +120,7 @@ export const updatePage = async (
                     name: page_update.options[i].next_page_name,
                     context: '',
                     next_page_name: null,
-                    prev_page_name: null,
+                    prev_page_name: existing_page.name,
                     options: [],
                     type: "END",
                     ussd_app_id: existing_page.ussd_app_id,
@@ -140,7 +140,7 @@ export const updatePage = async (
                 name: page_update.next_page_name,
                 context: '',
                 next_page_name: null,
-                prev_page_name: null,
+                prev_page_name: existing_page.name,
                 options: [],
                 type: "END",
                 ussd_app_id: existing_page.ussd_app_id,
@@ -178,7 +178,13 @@ export const deletePage = async (ussd_app_id: string, name: string, USSDPageObje
             }
         )
         if (prev_page) {
-            prev_page.next_page_name = null
+            if (prev_page.options.length > 0) {
+                const new_options = prev_page.options.filter((page_option) => page_option.next_page_name != existing_page.name)
+                prev_page.options = new_options
+            }
+            if (prev_page.next_page_name == existing_page.next_page_name){
+                prev_page.next_page_name = null
+            }
             await USSDPageObjectsAdapter.updatePage(prev_page.id || null, prev_page)
         }
         return delete_result
