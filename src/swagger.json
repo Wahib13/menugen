@@ -1,0 +1,357 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a simple example NodeJS API project to demonstrate Swagger Documentation",
+        "version": "1.0.0",
+        "title": "Tasks API",
+        "contact": {
+            "email": "abc@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "schemes": [
+        "http"
+    ],
+    "securityDefinitions": {
+        "bearerAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization"
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "host": "localhost:8000",
+    "basePath": "/api",
+    "paths": {
+        "/ussd_apps/": {
+            "post": {
+                "summary": "Create a USSD Application",
+                "description": "Creates a USSD Application and a default page with name \"intro\"",
+                "produces": [
+                    "application/json"
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "USSD app object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/USSD_App"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/USSD_AppResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidResponse"
+                        }
+                    }
+                }
+            },
+            "get": {
+                "summary": "Get all USSD Apps",
+                "description": "Returns all USSD Apps",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/USSD_AppResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ussd_pages/": {
+            "get": {
+                "summary": "Get all USSD Pages for a specific app",
+                "description": "Get all USSD Pages for a specific app",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "app_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/USSD_PageResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/ussd_pages/{app_id}/{page_name}": {
+            "get": {
+                "summary": "Get a USSD page",
+                "description": "Get a USSD page",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "app_id",
+                        "in": "path",
+                        "description": "ID of the USSD App",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page_name",
+                        "in": "path",
+                        "description": "Name of the USSD Page",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "object",
+                            "schema": {
+                                "$ref": "#/definitions/USSD_PageResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ussd_pages/{app_id}/{page_name}/": {
+            "delete": {
+                "summary": "Delete the page",
+                "description": "Delete a page",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "app_id",
+                        "in": "path",
+                        "description": "app_id of the page that needs to be deleted",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page_name",
+                        "in": "path",
+                        "description": "name of the page that should be deleted",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update/Create a USSD page",
+                "description": "specifying next_page_name creates a new page of that name",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "app_id",
+                        "description": "app_id of the page that needs to be updated",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "page_name",
+                        "description": "name of the page that should be updated",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "USSD app object",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/USSD_Page_Update"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "updated page",
+                        "schema": {
+                            "$ref": "#/definitions/USSD_Page"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/InvalidResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "USSD_App": {
+            "type": "object",
+            "properties": {
+                "shortcode": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "USSD_Page": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ussd_app_id": {
+                    "type": "string"
+                },
+                "context": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "prev_page_name": {
+                    "type": "string"
+                },
+                "next_page_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "USSD_AppResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "shortcode": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "USSD_Page_Update": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "required": false
+                },
+                "context": {
+                    "type": "string",
+                    "required": false
+                },
+                "next_page_name": {
+                    "type": "string",
+                    "required": false
+                }
+            }
+        },
+        "USSD_PageResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ussd_app_id": {
+                    "type": "string"
+                },
+                "context": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "prev_page_name": {
+                    "type": "string"
+                },
+                "next_page_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "InvalidResponse": {
+            "type": "object",
+            "properties": {
+                "statusCode": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

@@ -10,6 +10,8 @@ import cors from 'cors'
 import { ussd_interaction_router } from './routes/ussd_interaction_routes'
 import { connect_db, disconnect_db } from './mongodb'
 import { tedis } from './adapters/session_adapter'
+import swagger_ui from 'swagger-ui-express'
+import swagger_json from './swagger.json'
 
 dotenv.config()
 
@@ -47,6 +49,8 @@ passport.use(new Strategy(opts, (payload: any, done) => {
 }))
 
 app.use(express.json())
+
+app.use('/docs/', swagger_ui.serve, swagger_ui.setup(swagger_json))
 
 app.use('/api/users/', user_routes)
 app.use('/api/ussd_apps/', ussd_app_routes)

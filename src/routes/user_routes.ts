@@ -1,9 +1,6 @@
 import express from 'express'
 import passport from 'passport'
-import { Strategy, StrategyOptions } from 'passport-jwt'
-import { ExtractJwt } from 'passport-jwt'
-import { UserObjectAdapter } from '../adapters/user_objects_adapter'
-import { login, registerUser, showAllUsers, showUser } from '../controllers/user_controller'
+import { login, registerUser, showUser } from '../controllers/user_controller'
 import { createUserValidator } from '../controllers/validators/user_validator'
 
 
