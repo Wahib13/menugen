@@ -182,8 +182,12 @@ export const deletePage = async (ussd_app_id: string, name: string, USSDPageObje
                 const new_options = prev_page.options.filter((page_option) => page_option.next_page_name != existing_page.name)
                 prev_page.options = new_options
             }
-            if (prev_page.next_page_name == existing_page.next_page_name){
+            if (prev_page.next_page_name == existing_page.name) {
                 prev_page.next_page_name = null
+            }
+            // no options to lead to means that the interaction can't continue since the default page is deleted
+            if (prev_page.options.length == 0 && (prev_page.next_page_name == null || prev_page.next_page_name == "")) {
+                prev_page.type = "END"
             }
             await USSDPageObjectsAdapter.updatePage(prev_page.id || null, prev_page)
         }
